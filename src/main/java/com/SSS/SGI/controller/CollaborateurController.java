@@ -17,7 +17,7 @@ import java.util.Optional;
  * Permet le CRUD sur le compte collaborateur
  */
 @RestController
-@RequestMapping("/api/collaborateurs")
+@RequestMapping({"/api/collaborateurs", "/api/collaborateur"})
 @CrossOrigin(origins = "*")
 public class CollaborateurController {
 
@@ -52,8 +52,9 @@ public class CollaborateurController {
     /**
      * Récupère le profil du collaborateur courant
      * Accessible par tous les collaborateurs authentifiés
+     * Note: Added regex \\d+ to ensure it only matches numerical IDs
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<Collaborateur> getCollaborateur(@PathVariable Long id) {
         Optional<Collaborateur> collaborateur = collaborateurService.getCollaborateurById(id);
@@ -74,17 +75,18 @@ public class CollaborateurController {
     /**
      * Met à jour le profil du collaborateur (nom, prénom, email)
      * Permet au collaborateur de modifier ses données
+     * Note: Added regex \\d+
      */
-    @PutMapping("/{id}/profile")
+    @PutMapping("/{id:\\d+}/profile")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<Collaborateur> updateProfile(
             @PathVariable Long id,
             @RequestBody UpdateProfileRequest request) {
         Collaborateur updated = collaborateurService.updateCollaborateurProfile(
-            id,
-            request.getNom(),
-            request.getPrenom(),
-            request.getEmail()
+                id,
+                request.getNom(),
+                request.getPrenom(),
+                request.getEmail()
         );
         return ResponseEntity.ok(updated);
     }
@@ -92,8 +94,9 @@ public class CollaborateurController {
     /**
      * Change le mot de passe du collaborateur
      * Permet au collaborateur de modifier son mot de passe
+     * Note: Added regex \\d+
      */
-    @PostMapping("/{id}/change-password")
+    @PostMapping("/{id:\\d+}/change-password")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<String> changePassword(
             @PathVariable Long id,
@@ -127,13 +130,12 @@ public class CollaborateurController {
     /**
      * Supprime un collaborateur
      * Accessible uniquement par les administrateurs
+     * Note: Added regex \\d+
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:\\d+}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteCollaborateur(@PathVariable Long id) {
         collaborateurService.deleteCollaborateur(id);
         return ResponseEntity.ok("Collaborateur supprimé avec succès");
     }
 }
-
-

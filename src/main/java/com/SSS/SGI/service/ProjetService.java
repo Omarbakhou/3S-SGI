@@ -6,12 +6,10 @@ import com.SSS.SGI.entity.BudgetProjet;
 import com.SSS.SGI.repository.ClientRepository;
 import com.SSS.SGI.repository.ProjetRepository;
 import com.SSS.SGI.repository.BudgetProjetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,14 +20,17 @@ import java.util.Optional;
 @Transactional
 public class ProjetService {
 
-    @Autowired
-    private ProjetRepository projetRepository;
+    private final ProjetRepository projetRepository;
 
-    @Autowired
-    private ClientRepository clientRepository;
+    private final ClientRepository clientRepository;
 
-    @Autowired
-    private BudgetProjetRepository budgetProjetRepository;
+    private final BudgetProjetRepository budgetProjetRepository;
+
+    public ProjetService(ProjetRepository projetRepository, ClientRepository clientRepository, BudgetProjetRepository budgetProjetRepository) {
+        this.projetRepository = projetRepository;
+        this.clientRepository = clientRepository;
+        this.budgetProjetRepository = budgetProjetRepository;
+    }
 
     /**
      * Crée un nouveau client
@@ -50,6 +51,13 @@ public class ProjetService {
      */
     public List<Client> getAllClients() {
         return clientRepository.findAll();
+    }
+
+    /**
+     * Récupère un client par son nom
+     */
+    public Optional<Client> findByNomClient(String nomClient) {
+        return clientRepository.findByNomClient(nomClient);
     }
 
     /**
@@ -90,6 +98,13 @@ public class ProjetService {
     }
 
     /**
+     * Récupère un projet par son nom
+     */
+    public Optional<Projet> findProjetByNom(String nom) {
+        return projetRepository.findProjetByNom(nom);
+    }
+
+    /**
      * Récupère tous les projets
      */
     public List<Projet> getAllProjets() {
@@ -100,7 +115,7 @@ public class ProjetService {
      * Récupère les projets d'un client
      */
     public List<Projet> getProjetsByClient(Long clientId) {
-        return projetRepository.findByClientId(clientId);
+        return projetRepository.findProjetByClientId(clientId);
     }
 
     /**

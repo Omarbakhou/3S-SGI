@@ -1,15 +1,14 @@
 package com.SSS.SGI.service;
 
 import com.SSS.SGI.entity.Imputation;
-import com.SSS.SGI.entity.Employe;
 import com.SSS.SGI.entity.Manager;
-import com.SSS.SGI.entity.Projet;
 import com.SSS.SGI.entity.StatutImputation;
 import com.SSS.SGI.repository.ImputationRepository;
 import com.SSS.SGI.repository.EmployeRepository;
 import com.SSS.SGI.repository.ManagerRepository;
 import com.SSS.SGI.repository.ProjetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,17 +23,24 @@ import java.util.Optional;
 @Transactional
 public class ImputationService {
 
-    @Autowired
-    private ImputationRepository imputationRepository;
+    private final ImputationRepository imputationRepository;
 
-    @Autowired
+    @Setter
+    @Getter
     private EmployeRepository employeRepository;
 
-    @Autowired
-    private ManagerRepository managerRepository;
+    private final ManagerRepository managerRepository;
 
-    @Autowired
+    @Setter
+    @Getter
     private ProjetRepository projetRepository;
+
+    public ImputationService(ImputationRepository imputationRepository, EmployeRepository employeRepository, ManagerRepository managerRepository, ProjetRepository projetRepository) {
+        this.imputationRepository = imputationRepository;
+        this.employeRepository = employeRepository;
+        this.managerRepository = managerRepository;
+        this.projetRepository = projetRepository;
+    }
 
     /**
      * Crée une nouvelle imputation (employé)
@@ -74,6 +80,13 @@ public class ImputationService {
      */
     public List<Imputation> getImputationsByProjet(Long projetId) {
         return imputationRepository.findByProjetId(projetId);
+    }
+
+    /**
+     * Récupère les imputations d'un employé et d'un projet
+     */
+    public List<Imputation> findByEmployeIdAndProjetId(Long employeId, Long projetId) {
+        return imputationRepository.findByEmployeIdAndProjetId(employeId, projetId);
     }
 
     /**
@@ -142,10 +155,10 @@ public class ImputationService {
         Optional<Imputation> imputation = imputationRepository.findById(imputationId);
         Optional<Manager> manager = managerRepository.findById(managerId);
 
-        if (!imputation.isPresent()) {
+        if (imputation.isEmpty()) {
             throw new IllegalArgumentException("Imputation non trouvée avec l'ID: " + imputationId);
         }
-        if (!manager.isPresent()) {
+        if (manager.isEmpty()) {
             throw new IllegalArgumentException("Manager non trouvé avec l'ID: " + managerId);
         }
 
@@ -164,10 +177,10 @@ public class ImputationService {
         Optional<Imputation> imputation = imputationRepository.findById(imputationId);
         Optional<Manager> manager = managerRepository.findById(managerId);
 
-        if (!imputation.isPresent()) {
+        if (imputation.isEmpty()) {
             throw new IllegalArgumentException("Imputation non trouvée avec l'ID: " + imputationId);
         }
-        if (!manager.isPresent()) {
+        if (manager.isEmpty()) {
             throw new IllegalArgumentException("Manager non trouvé avec l'ID: " + managerId);
         }
 
@@ -184,5 +197,6 @@ public class ImputationService {
     public List<Imputation> getImputationsEnAttenteForManager() {
         return imputationRepository.findByStatut(StatutImputation.EN_ATTENTE);
     }
+
 }
 

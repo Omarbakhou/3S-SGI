@@ -6,7 +6,6 @@ import com.SSS.SGI.entity.Manager;
 import com.SSS.SGI.repository.CollaborateurRepository;
 import com.SSS.SGI.repository.EmployeRepository;
 import com.SSS.SGI.repository.ManagerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,30 +21,26 @@ import java.util.Optional;
 @Transactional
 public class CollaborateurService {
 
-    @Autowired
-    private CollaborateurRepository collaborateurRepository;
+    private final CollaborateurRepository collaborateurRepository;
 
-    @Autowired
-    private EmployeRepository employeRepository;
+    private final EmployeRepository employeRepository;
 
-    @Autowired
-    private ManagerRepository managerRepository;
+    private final ManagerRepository managerRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
+    public CollaborateurService(CollaborateurRepository collaborateurRepository, EmployeRepository employeRepository, ManagerRepository managerRepository, PasswordEncoder passwordEncoder) {
+        this.collaborateurRepository = collaborateurRepository;
+        this.employeRepository = employeRepository;
+        this.managerRepository = managerRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     /**
      * Récupère un collaborateur par son ID
      */
     public Optional<Collaborateur> getCollaborateurById(Long id) {
         return collaborateurRepository.findById(id);
-    }
-
-    /**
-     * Récupère un collaborateur par son email
-     */
-    public Optional<Collaborateur> getCollaborateurByEmail(String email) {
-        return collaborateurRepository.findByEmail(email);
     }
 
     /**
@@ -134,10 +129,25 @@ public class CollaborateurService {
     }
 
     /**
+     * Récupère un employé par son email
+     */
+    public Optional<Employe> findEmployeByEmail(String email) {
+        return employeRepository.findEmployeByEmail(email);
+    }
+
+    /**
      * Récupère un manager par son ID
      */
     public Optional<Manager> getManagerById(Long id) {
         return managerRepository.findById(id);
     }
+
+    /**
+     * Récupère un manager par son email
+     */
+    public Optional<Manager> findByEmail(String email) {
+        return managerRepository.findByEmail(email);
+    }
+
 }
 

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,32 +31,44 @@ public class ProjetController {
 
     /**
      * Crée un nouveau client
-     * Accessible uniquement par les administrateurs
+     * Accessible uniquement par les managers
      */
-    @PostMapping("/clients")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Client> createClient(@RequestBody Client client) {
+    @PostMapping("/api/clients")
+    @PreAuthorize("hasRole('MANAGER')")
+    @SuppressWarnings("all")
+    public ResponseEntity<Client> createClient(@Valid @RequestBody Client client) {
         Client created = projetService.createClient(client);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     /**
      * Récupère un client par son ID
-     * Accessible par les managers et administrateurs
+     * Accessible par les managers
      */
     @GetMapping("/clients/{id}")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<Client> getClient(@PathVariable Long id) {
         Optional<Client> client = projetService.getClientById(id);
         return client.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     /**
+     * Récupère un client par son nom
+     * Accessible par les managers
+     */
+    @GetMapping("/clients/nom/{nom}")
+    @PreAuthorize("hasAnyRole('MANAGER')")
+    public ResponseEntity<Client> findByNomClient(@PathVariable String nom) {
+        Optional<Client> client = projetService.findByNomClient(nom);
+        return client.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
      * Récupère tous les clients
-     * Accessible par les managers et administrateurs
+     * Accessible par les managers
      */
     @GetMapping("/clients")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<Client>> getAllClients() {
         List<Client> clients = projetService.getAllClients();
         return ResponseEntity.ok(clients);
@@ -63,23 +76,23 @@ public class ProjetController {
 
     /**
      * Met à jour un client
-     * Accessible uniquement par les administrateurs
+     * Accessible uniquement par les managers
      */
     @PutMapping("/clients/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Client> updateClient(
             @PathVariable Long id,
-            @RequestBody Client updatedClient) {
+            @Valid @RequestBody Client updatedClient) {
         Client updated = projetService.updateClient(id, updatedClient);
         return ResponseEntity.ok(updated);
     }
 
     /**
      * Supprime un client
-     * Accessible uniquement par les administrateurs
+     * Accessible uniquement par les managers
      */
     @DeleteMapping("/clients/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<String> deleteClient(@PathVariable Long id) {
         projetService.deleteClient(id);
         return ResponseEntity.ok("Client supprimé avec succès");
@@ -89,11 +102,12 @@ public class ProjetController {
 
     /**
      * Crée un nouveau projet
-     * Accessible par les managers et administrateurs
+     * Accessible par les managers
      */
     @PostMapping
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ResponseEntity<Projet> createProjet(@RequestBody Projet projet) {
+    @PreAuthorize("hasAnyRole('MANAGER')")
+    @SuppressWarnings("all")
+    public ResponseEntity<Projet> createProjet(@Valid @RequestBody Projet projet) {
         Projet created = projetService.createProjet(projet);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -111,21 +125,32 @@ public class ProjetController {
 
     /**
      * Récupère tous les projets
-     * Accessible par les managers et administrateurs
+     * Accessible par les managers
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<Projet>> getAllProjets() {
         List<Projet> projets = projetService.getAllProjets();
         return ResponseEntity.ok(projets);
     }
 
     /**
+     * Récupère un projet par son nom
+     * Accessible par les managers
+     */
+    @GetMapping("/nomProjet")
+    @PreAuthorize("hasAnyRole('MANAGER')")
+    public ResponseEntity<Optional<Projet>> findProjetByNom(@RequestParam String nom) {
+        Optional<Projet> projets = projetService.findProjetByNom(nom);
+        return ResponseEntity.ok(projets);
+    }
+
+    /**
      * Récupère les projets d'un client
-     * Accessible par les managers et administrateurs
+     * Accessible par les managers
      */
     @GetMapping("/client/{clientId}")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<Projet>> getProjetsByClient(@PathVariable Long clientId) {
         List<Projet> projets = projetService.getProjetsByClient(clientId);
         return ResponseEntity.ok(projets);
@@ -133,23 +158,23 @@ public class ProjetController {
 
     /**
      * Met à jour un projet
-     * Accessible par les managers et administrateurs
+     * Accessible par les managers
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<Projet> updateProjet(
             @PathVariable Long id,
-            @RequestBody Projet updatedProjet) {
+            @Valid @RequestBody Projet updatedProjet) {
         Projet updated = projetService.updateProjet(id, updatedProjet);
         return ResponseEntity.ok(updated);
     }
 
     /**
      * Supprime un projet
-     * Accessible uniquement par les administrateurs
+     * Accessible uniquement par les managers
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<String> deleteProjet(@PathVariable Long id) {
         projetService.deleteProjet(id);
         return ResponseEntity.ok("Projet supprimé avec succès");
@@ -159,11 +184,12 @@ public class ProjetController {
 
     /**
      * Crée un projet avec budget
-     * Accessible par les managers et administrateurs
+     * Accessible par les managers
      */
     @PostMapping("/budget")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ResponseEntity<BudgetProjet> createBudgetProjet(@RequestBody BudgetProjet budgetProjet) {
+    @PreAuthorize("hasAnyRole('MANAGER')")
+    @SuppressWarnings("all")
+    public ResponseEntity<BudgetProjet> createBudgetProjet(@Valid @RequestBody BudgetProjet budgetProjet) {
         BudgetProjet created = projetService.createBudgetProjet(budgetProjet);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -173,7 +199,7 @@ public class ProjetController {
      * Accessible par les managers et administrateurs
      */
     @GetMapping("/budget/{id}")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<BudgetProjet> getBudgetProjet(@PathVariable Long id) {
         Optional<BudgetProjet> budgetProjet = projetService.getBudgetProjetById(id);
         return budgetProjet.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
@@ -184,7 +210,7 @@ public class ProjetController {
      * Accessible par les managers et administrateurs
      */
     @GetMapping("/budget")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<BudgetProjet>> getAllBudgetProjets() {
         List<BudgetProjet> budgetProjets = projetService.getAllBudgetProjets();
         return ResponseEntity.ok(budgetProjets);
@@ -195,7 +221,7 @@ public class ProjetController {
      * Accessible par les managers et administrateurs
      */
     @GetMapping("/budget/client/{clientId}")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<BudgetProjet>> getBudgetProjetsByClient(@PathVariable Long clientId) {
         List<BudgetProjet> budgetProjets = projetService.getBudgetProjetsByClient(clientId);
         return ResponseEntity.ok(budgetProjets);
@@ -206,20 +232,20 @@ public class ProjetController {
      * Accessible par les managers et administrateurs
      */
     @PutMapping("/budget/{id}")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<BudgetProjet> updateBudgetProjet(
             @PathVariable Long id,
-            @RequestBody UpdateBudgetProjetRequest request) {
+            @Valid @RequestBody UpdateBudgetProjetRequest request) {
         BudgetProjet updated = projetService.updateBudgetProjet(id, request.getBudgetInitial(), request.getTjm());
         return ResponseEntity.ok(updated);
     }
 
     /**
      * Supprime un projet avec budget
-     * Accessible uniquement par les administrateurs
+     * Accessible uniquement par les managers
      */
     @DeleteMapping("/budget/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<String> deleteBudgetProjet(@PathVariable Long id) {
         projetService.deleteBudgetProjet(id);
         return ResponseEntity.ok("Projet avec budget supprimé avec succès");
