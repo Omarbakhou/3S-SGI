@@ -85,7 +85,7 @@ public class ImputationService {
     /**
      * Récupère les imputations d'un employé et d'un projet
      */
-    public List<Imputation> findByEmployeIdAndProjetId(Long employeId, Long projetId) {
+    public List<Imputation> getImputationsByEmployeIdAndProjetId(Long employeId, Long projetId) {
         return imputationRepository.findByEmployeIdAndProjetId(employeId, projetId);
     }
 
@@ -197,6 +197,7 @@ public class ImputationService {
     public List<Imputation> getImputationsEnAttenteForManager() {
         return imputationRepository.findByStatut(StatutImputation.EN_ATTENTE);
     }
-
 }
+
+
 

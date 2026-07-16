@@ -51,10 +51,10 @@ public class ImputationController {
 
     /**
      * Récupère toutes les imputations
-     * Accessible uniquement par les administrateurs et managers
+     * Accessible uniquement par  managers
      */
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<Imputation>> getAllImputations() {
         List<Imputation> imputations = imputationService.getAllImputations();
         return ResponseEntity.ok(imputations);
@@ -83,6 +83,20 @@ public class ImputationController {
     }
 
     /**
+     * Récupère les imputations d'un employe et dun projet
+     * Accessible par les managers
+     */
+    @GetMapping("/employe/{employeId}/projet/{projetId}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<List<Imputation>> getImputationsByEmployeAndProjet(
+            @PathVariable Long employeId,
+            @PathVariable Long projetId) {
+        List<Imputation> imputations = imputationService.getImputationsByEmployeIdAndProjetId(employeId, projetId);
+        return ResponseEntity.ok(imputations);
+    }
+
+
+    /**
      * Récupère les imputations avec un statut spécifique
      * Accessible par les managers
      */
@@ -90,6 +104,17 @@ public class ImputationController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<Imputation>> getImputationsByStatut(@PathVariable StatutImputation statut) {
         List<Imputation> imputations = imputationService.getImputationsByStatut(statut);
+        return ResponseEntity.ok(imputations);
+    }
+
+    /**
+     * Récupère les imputations avec id manager
+     * Accessible par les managers
+     */
+    @GetMapping("/manager/{managerId}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<List<Imputation>> getImputationsByManager(@PathVariable Long managerId) {
+        List<Imputation> imputations = imputationService.getImputationsByManager(managerId);
         return ResponseEntity.ok(imputations);
     }
 
