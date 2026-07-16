@@ -97,13 +97,13 @@ public class ImputationController {
 
 
     /**
-     * Récupère les imputations avec un statut spécifique
+     * Récupère les imputations d'un employe avec un statut spécifique
      * Accessible par les managers
      */
-    @GetMapping("/statut/{statut}")
+    @GetMapping("/employe/{employeId}/statut/{statut}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<List<Imputation>> getImputationsByStatut(@PathVariable StatutImputation statut) {
-        List<Imputation> imputations = imputationService.getImputationsByStatut(statut);
+    public ResponseEntity<List<Imputation>> getImputationsByEmployeAndStatut(@PathVariable Long employeId, @PathVariable StatutImputation statut) {
+        List<Imputation> imputations = imputationService.getImputationsByEmployeAndStatut(employeId, statut);
         return ResponseEntity.ok(imputations);
     }
 

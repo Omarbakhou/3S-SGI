@@ -44,6 +44,19 @@ public class CollaborateurService {
     }
 
     /**
+     * Récupère un collaborateur par son email
+     */
+    public Optional<Collaborateur> getCollaborateurByEmail(String email) {
+        return collaborateurRepository.findByEmail(email);
+    }
+
+    /**
+     * Récupère un collaborateur par son nom et prénom
+     */
+    public Optional<Collaborateur> getCollaborateurByNomAndPrenom(String nom, String prenom) {
+        return collaborateurRepository.findByNomAndPrenom(nom, prenom);
+    }
+    /**
      * Récupère tous les collaborateurs
      */
     public List<Collaborateur> getAllCollaborateurs() {

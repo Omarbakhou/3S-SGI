@@ -28,6 +28,29 @@ public class CollaborateurController {
     }
 
     /**
+     * Récupère un collaborateur par son email
+     * Accessible uniquement par les administrateurs
+     */
+    @GetMapping("/email/{email}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Collaborateur> getCollaborateurByEmail(@PathVariable String email) {
+        Optional<Collaborateur> collaborateur = collaborateurService.getCollaborateurByEmail(email);
+        return collaborateur.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /**
+     * Récupère un collaborateur par son nom et prénom
+     * Accessible uniquement par les administrateurs
+     */
+    @GetMapping("/recherche")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Collaborateur> getCollaborateurByNomAndPrenom(
+            @RequestParam String nom,
+            @RequestParam String prenom) {
+        Optional<Collaborateur> collaborateur = collaborateurService.getCollaborateurByNomAndPrenom(nom, prenom);
+        return collaborateur.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+    /**
      * Crée un nouvel employé
      * Accessible uniquement par les administrateurs
      */
