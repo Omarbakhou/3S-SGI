@@ -67,6 +67,20 @@ public class CollaborateurService {
      * Crée un nouvel employé
      */
     public Employe createEmploye(Employe employe) {
+        // Validation des champs obligatoires
+        if (employe.getNom() == null || employe.getNom().trim().isEmpty()) {
+            throw new IllegalArgumentException("Le nom de l'employé est obligatoire");
+        }
+        if (employe.getPrenom() == null || employe.getPrenom().trim().isEmpty()) {
+            throw new IllegalArgumentException("Le prénom de l'employé est obligatoire");
+        }
+        if (employe.getEmail() == null || employe.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("L'email de l'employé est obligatoire");
+        }
+        if (employe.getMotDePasse() == null || employe.getMotDePasse().trim().isEmpty()) {
+            throw new IllegalArgumentException("Le mot de passe de l'employé est obligatoire");
+        }
+
         employe.setMotDePasse(passwordEncoder.encode(employe.getMotDePasse()));
         return employeRepository.save(employe);
     }
@@ -75,6 +89,20 @@ public class CollaborateurService {
      * Crée un nouveau manager
      */
     public Manager createManager(Manager manager) {
+        // Validation des champs obligatoires
+        if (manager.getNom() == null || manager.getNom().trim().isEmpty()) {
+            throw new IllegalArgumentException("Le nom du manager est obligatoire");
+        }
+        if (manager.getPrenom() == null || manager.getPrenom().trim().isEmpty()) {
+            throw new IllegalArgumentException("Le prénom du manager est obligatoire");
+        }
+        if (manager.getEmail() == null || manager.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("L'email du manager est obligatoire");
+        }
+        if (manager.getMotDePasse() == null || manager.getMotDePasse().trim().isEmpty()) {
+            throw new IllegalArgumentException("Le mot de passe du manager est obligatoire");
+        }
+
         manager.setMotDePasse(passwordEncoder.encode(manager.getMotDePasse()));
         return managerRepository.save(manager);
     }

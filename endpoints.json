@@ -1,0 +1,518 @@
+[
+  {
+    "controllerClass": "com.SSS.SGI.controller.ImputationController",
+    "file": "C:\\Users\\pc\\Bureau\\SGI\\3S-SGI\\src\\main\\java\\com\\SSS\\SGI\\controller\\ImputationController.java",
+    "classLevelRequestMapping": "/api/imputations",
+    "endpoints": [
+      {
+        "httpMethod": "POST",
+        "fullPath": "/api/imputations",
+        "mappingAnnotationLine": "@PostMapping",
+        "mappingLineNumber": 34,
+        "preAuthorize": "@PreAuthorize(\"hasRole('EMPLOYE')\")",
+        "requestBodyValid": false,
+        "requestBodyAnnotation": "@RequestBody Imputation imputation"
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/imputations/{id}",
+        "mappingAnnotationLine": "@GetMapping(\"/{id}\")",
+        "mappingLineNumber": 45,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('EMPLOYE', 'MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/imputations",
+        "mappingAnnotationLine": "@GetMapping",
+        "mappingLineNumber": 56,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/imputations/employe/{employeId}",
+        "mappingAnnotationLine": "@GetMapping(\"/employe/{employeId}\")",
+        "mappingLineNumber": 67,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('EMPLOYE', 'MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/imputations/projet/{projetId}",
+        "mappingAnnotationLine": "@GetMapping(\"/projet/{projetId}\")",
+        "mappingLineNumber": 78,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/imputations/employe/{employeId}/projet/{projetId}",
+        "mappingAnnotationLine": "@GetMapping(\"/employe/{employeId}/projet/{projetId}\")",
+        "mappingLineNumber": 89,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/imputations/employe/{employeId}/statut/{statut}",
+        "mappingAnnotationLine": "@GetMapping(\"/employe/{employeId}/statut/{statut}\")",
+        "mappingLineNumber": 103,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/imputations/manager/{managerId}",
+        "mappingAnnotationLine": "@GetMapping(\"/manager/{managerId}\")",
+        "mappingLineNumber": 114,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/imputations/en-attente",
+        "mappingAnnotationLine": "@GetMapping(\"/en-attente\")",
+        "mappingLineNumber": 125,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "PUT",
+        "fullPath": "/api/imputations/{id}",
+        "mappingAnnotationLine": "@PutMapping(\"/{id}\")",
+        "mappingLineNumber": 136,
+        "preAuthorize": "@PreAuthorize(\"hasRole('EMPLOYE')\")",
+        "requestBodyValid": false,
+        "requestBodyAnnotation": "@RequestBody Imputation updatedImputation"
+      },
+      {
+        "httpMethod": "DELETE",
+        "fullPath": "/api/imputations/{id}",
+        "mappingAnnotationLine": "@DeleteMapping(\"/{id}\")",
+        "mappingLineNumber": 149,
+        "preAuthorize": "@PreAuthorize(\"hasRole('EMPLOYE')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "POST",
+        "fullPath": "/api/imputations/{imputationId}/valider",
+        "mappingAnnotationLine": "@PostMapping(\"/{imputationId}/valider\")",
+        "mappingLineNumber": 160,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "POST",
+        "fullPath": "/api/imputations/{imputationId}/rejeter",
+        "mappingAnnotationLine": "@PostMapping(\"/{imputationId}/rejeter\")",
+        "mappingLineNumber": 173,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      }
+    ]
+  },
+  {
+    "controllerClass": "com.SSS.SGI.controller.AffectationController",
+    "file": "C:\\Users\\pc\\Bureau\\SGI\\3S-SGI\\src\\main\\java\\com\\SSS\\SGI\\controller\\AffectationController.java",
+    "classLevelRequestMapping": "/api/affectations",
+    "endpoints": [
+      {
+        "httpMethod": "POST",
+        "fullPath": "/api/affectations",
+        "mappingAnnotationLine": "@PostMapping",
+        "mappingLineNumber": 34,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER', 'ADMIN')\")",
+        "requestBodyValid": false,
+        "requestBodyAnnotation": "@RequestBody CreateAffectationRequest request"
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/affectations/{collaborateurId}/{projetId}",
+        "mappingAnnotationLine": "@GetMapping(\"/{collaborateurId}/{projetId}\")",
+        "mappingLineNumber": 50,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('EMPLOYE', 'MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/affectations/collaborateur/{collaborateurId}",
+        "mappingAnnotationLine": "@GetMapping(\"/collaborateur/{collaborateurId}\")",
+        "mappingLineNumber": 63,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('EMPLOYE', 'MANAGER', 'ADMIN')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/affectations/projet/{projetId}",
+        "mappingAnnotationLine": "@GetMapping(\"/projet/{projetId}\")",
+        "mappingLineNumber": 74,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER', 'ADMIN')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/affectations",
+        "mappingAnnotationLine": "@GetMapping",
+        "mappingLineNumber": 85,
+        "preAuthorize": "@PreAuthorize(\"hasRole('ADMIN')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "PUT",
+        "fullPath": "/api/affectations/{collaborateurId}/{projetId}/taux",
+        "mappingAnnotationLine": "@PutMapping(\"/{collaborateurId}/{projetId}/taux\")",
+        "mappingLineNumber": 96,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER', 'ADMIN')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "DELETE",
+        "fullPath": "/api/affectations/{collaborateurId}/{projetId}",
+        "mappingAnnotationLine": "@DeleteMapping(\"/{collaborateurId}/{projetId}\")",
+        "mappingLineNumber": 110,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER', 'ADMIN')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/affectations/collaborateur/{collaborateurId}/taux-total",
+        "mappingAnnotationLine": "@GetMapping(\"/collaborateur/{collaborateurId}/taux-total\")",
+        "mappingLineNumber": 123,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('EMPLOYE', 'MANAGER', 'ADMIN')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/affectations/collaborateur/{collaborateurId}/can-affect",
+        "mappingAnnotationLine": "@GetMapping(\"/collaborateur/{collaborateurId}/can-affect\")",
+        "mappingLineNumber": 134,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER', 'ADMIN')\")",
+        "requestBodyValid": false
+      }
+    ]
+  },
+  {
+    "controllerClass": "com.SSS.SGI.controller.ClientController",
+    "file": "C:\\Users\\pc\\Bureau\\SGI\\3S-SGI\\src\\main\\java\\com\\SSS\\SGI\\controller\\ClientController.java",
+    "classLevelRequestMapping": "/api/clients",
+    "endpoints": [
+      {
+        "httpMethod": "POST",
+        "fullPath": "/api/clients",
+        "mappingAnnotationLine": "@PostMapping",
+        "mappingLineNumber": 29,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": true,
+        "requestBodyAnnotation": "@Valid @RequestBody Client client"
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/clients/{id}",
+        "mappingAnnotationLine": "@GetMapping(\"/{id}\")",
+        "mappingLineNumber": 40,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/clients/nom/{nom}",
+        "mappingAnnotationLine": "@GetMapping(\"/nom/{nom}\")",
+        "mappingLineNumber": 51,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/clients",
+        "mappingAnnotationLine": "@GetMapping",
+        "mappingLineNumber": 62,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "PUT",
+        "fullPath": "/api/clients/{id}",
+        "mappingAnnotationLine": "@PutMapping(\"/{id}\")",
+        "mappingLineNumber": 73,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": true,
+        "requestBodyAnnotation": "@Valid @RequestBody Client updatedClient"
+      },
+      {
+        "httpMethod": "DELETE",
+        "fullPath": "/api/clients/{id}",
+        "mappingAnnotationLine": "@DeleteMapping(\"/{id}\")",
+        "mappingLineNumber": 86,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      }
+    ]
+  },
+  {
+    "controllerClass": "com.SSS.SGI.controller.CollaborateurController",
+    "file": "C:\\Users\\pc\\Bureau\\SGI\\3S-SGI\\src\\main\\java\\com\\SSS\\SGI\\controller\\CollaborateurController.java",
+    "classLevelRequestMapping": [
+      "/api/collaborateurs",
+      "/api/collaborateur"
+    ],
+    "endpoints": [
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/email/{email}", "/api/collaborateur/email/{email}"],
+        "mappingAnnotationLine": "@GetMapping(\"/email/{email}\")",
+        "mappingLineNumber": 35,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/recherche", "/api/collaborateur/recherche"],
+        "mappingAnnotationLine": "@GetMapping(\"/recherche\")",
+        "mappingLineNumber": 46,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/employe", "/api/collaborateur/employe"],
+        "mappingAnnotationLine": "@GetMapping(\"/employe\")",
+        "mappingLineNumber": 58,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "POST",
+        "fullPath": ["/api/collaborateurs/employe", "/api/collaborateur/employe"],
+        "mappingAnnotationLine": "@PostMapping(\"/employe\")",
+        "mappingLineNumber": 69,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": true,
+        "requestBodyAnnotation": "@Valid @RequestBody Employe employe"
+      },
+      {
+        "httpMethod": "POST",
+        "fullPath": ["/api/collaborateurs/manager", "/api/collaborateur/manager"],
+        "mappingAnnotationLine": "@PostMapping(\"/manager\")",
+        "mappingLineNumber": 80,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": true,
+        "requestBodyAnnotation": "@Valid @RequestBody Manager manager"
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/manager", "/api/collaborateur/manager"],
+        "mappingAnnotationLine": "@GetMapping(\"/manager\")",
+        "mappingLineNumber": 91,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/{id}", "/api/collaborateur/{id}"],
+        "mappingAnnotationLine": "@GetMapping(\"/{id:\\\\d+}\")",
+        "mappingLineNumber": 103,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('EMPLOYE', 'MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs", "/api/collaborateur"],
+        "mappingAnnotationLine": "@GetMapping",
+        "mappingLineNumber": 114,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "PUT",
+        "fullPath": ["/api/collaborateurs/{id}/profile", "/api/collaborateur/{id}/profile"],
+        "mappingAnnotationLine": "@PutMapping(\"/{id:\\\\d+}/profile\")",
+        "mappingLineNumber": 126,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('EMPLOYE', 'MANAGER')\")",
+        "requestBodyValid": true,
+        "requestBodyAnnotation": "@Valid @RequestBody UpdateProfileRequest request"
+      },
+      {
+        "httpMethod": "POST",
+        "fullPath": ["/api/collaborateurs/{id}/change-password", "/api/collaborateur/{id}/change-password"],
+        "mappingAnnotationLine": "@PostMapping(\"/{id:\\\\d+}/change-password\")",
+        "mappingLineNumber": 145,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('EMPLOYE', 'MANAGER')\")",
+        "requestBodyValid": true,
+        "requestBodyAnnotation": "@Valid @RequestBody ChangePasswordRequest request"
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/employes", "/api/collaborateur/employes"],
+        "mappingAnnotationLine": "@GetMapping(\"/employes\")",
+        "mappingLineNumber": 158,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/employe/{id}", "/api/collaborateur/employe/{id}"],
+        "mappingAnnotationLine": "@GetMapping(\"/employe/{id:\\\\d+}\")",
+        "mappingLineNumber": 170,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/employe/email/{email}", "/api/collaborateur/employe/email/{email}"],
+        "mappingAnnotationLine": "@GetMapping(\"/employe/email/{email}\")",
+        "mappingLineNumber": 181,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/managers", "/api/collaborateur/managers"],
+        "mappingAnnotationLine": "@GetMapping(\"/managers\")",
+        "mappingLineNumber": 192,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/manager/{id}", "/api/collaborateur/manager/{id}"],
+        "mappingAnnotationLine": "@GetMapping(\"/manager/{id:\\\\d+}\")",
+        "mappingLineNumber": 204,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": ["/api/collaborateurs/manager/email/{email}", "/api/collaborateur/manager/email/{email}"],
+        "mappingAnnotationLine": "@GetMapping(\"/manager/email/{email}\")",
+        "mappingLineNumber": 215,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "DELETE",
+        "fullPath": ["/api/collaborateurs/{id}", "/api/collaborateur/{id}"],
+        "mappingAnnotationLine": "@DeleteMapping(\"/{id:\\\\d+}\")",
+        "mappingLineNumber": 227,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      }
+    ]
+  },
+  {
+    "controllerClass": "com.SSS.SGI.controller.ProjetController",
+    "file": "C:\\Users\\pc\\Bureau\\SGI\\3S-SGI\\src\\main\\java\\com\\SSS\\SGI\\controller\\ProjetController.java",
+    "classLevelRequestMapping": "/api/projets",
+    "endpoints": [
+      {
+        "httpMethod": "POST",
+        "fullPath": "/api/projets",
+        "mappingAnnotationLine": "@PostMapping",
+        "mappingLineNumber": 36,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": true,
+        "requestBodyAnnotation": "@Valid @RequestBody Projet projet"
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/projets/{id}",
+        "mappingAnnotationLine": "@GetMapping(\"/{id}\")",
+        "mappingLineNumber": 48,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('EMPLOYE', 'MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/projets",
+        "mappingAnnotationLine": "@GetMapping",
+        "mappingLineNumber": 59,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/projets/nomProjet",
+        "mappingAnnotationLine": "@GetMapping(\"/nomProjet\")",
+        "mappingLineNumber": 70,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/projets/client/{clientId}",
+        "mappingAnnotationLine": "@GetMapping(\"/client/{clientId}\")",
+        "mappingLineNumber": 81,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "PUT",
+        "fullPath": "/api/projets/{id}",
+        "mappingAnnotationLine": "@PutMapping(\"/{id}\")",
+        "mappingLineNumber": 92,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": true,
+        "requestBodyAnnotation": "@Valid @RequestBody Projet updatedProjet"
+      },
+      {
+        "httpMethod": "DELETE",
+        "fullPath": "/api/projets/{id}",
+        "mappingAnnotationLine": "@DeleteMapping(\"/{id}\")",
+        "mappingLineNumber": 105,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "POST",
+        "fullPath": "/api/projets/budget",
+        "mappingAnnotationLine": "@PostMapping(\"/budget\")",
+        "mappingLineNumber": 118,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": true,
+        "requestBodyAnnotation": "@Valid @RequestBody BudgetProjet budgetProjet"
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/projets/budget/{id}",
+        "mappingAnnotationLine": "@GetMapping(\"/budget/{id}\")",
+        "mappingLineNumber": 130,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/projets/budget",
+        "mappingAnnotationLine": "@GetMapping(\"/budget\")",
+        "mappingLineNumber": 141,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "GET",
+        "fullPath": "/api/projets/budget/client/{clientId}",
+        "mappingAnnotationLine": "@GetMapping(\"/budget/client/{clientId}\")",
+        "mappingLineNumber": 152,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": false
+      },
+      {
+        "httpMethod": "PUT",
+        "fullPath": "/api/projets/budget/{id}",
+        "mappingAnnotationLine": "@PutMapping(\"/budget/{id}\")",
+        "mappingLineNumber": 163,
+        "preAuthorize": "@PreAuthorize(\"hasAnyRole('MANAGER')\")",
+        "requestBodyValid": true,
+        "requestBodyAnnotation": "@Valid @RequestBody UpdateBudgetProjetRequest request"
+      },
+      {
+        "httpMethod": "DELETE",
+        "fullPath": "/api/projets/budget/{id}",
+        "mappingAnnotationLine": "@DeleteMapping(\"/budget/{id}\")",
+        "mappingLineNumber": 176,
+        "preAuthorize": "@PreAuthorize(\"hasRole('MANAGER')\")",
+        "requestBodyValid": false
+      }
+    ]
+  }
+]
+

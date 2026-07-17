@@ -36,6 +36,10 @@ public class ProjetService {
      * Crée un nouveau client
      */
     public Client createClient(Client client) {
+        // Validation des champs obligatoires
+        if (client.getNomClient() == null || client.getNomClient().trim().isEmpty()) {
+            throw new IllegalArgumentException("Le nom du client est obligatoire");
+        }
         return clientRepository.save(client);
     }
 

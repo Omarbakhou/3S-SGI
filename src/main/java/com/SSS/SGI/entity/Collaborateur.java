@@ -1,6 +1,8 @@
 package com.SSS.SGI.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,15 +24,20 @@ public class Collaborateur {
     @Column(name = "id_collaborateur")
     private Long id;
 
+    @NotBlank(message = "Le nom du collaborateur est obligatoire")
     @Column(name = "nom", nullable = false, length = 50)
     private String nom;
 
+    @NotBlank(message = "Le prénom du collaborateur est obligatoire")
     @Column(name = "prenom", nullable = false, length = 50)
     private String prenom;
 
+    @NotBlank(message = "L'email du collaborateur est obligatoire")
+    @Email(message = "L'email doit être valide")
     @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
+    @NotBlank(message = "Le mot de passe du collaborateur est obligatoire")
     @Column(name = "mot_de_passe", nullable = false)
     private String motDePasse;
 
