@@ -104,6 +104,44 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    @ExceptionHandler(QuotaInsuffisantException.class)
+    public ResponseEntity<ErrorResponse> handleQuotaInsuffisantException(
+            QuotaInsuffisantException ex,
+            WebRequest request) {
+        this.request = request;
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AbsenceChevauchementException.class)
+    public ResponseEntity<ErrorResponse> handleAbsenceChevauchementException(
+            AbsenceChevauchementException ex,
+            WebRequest request) {
+        this.request = request;
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(JustificatifManquantException.class)
+    public ResponseEntity<ErrorResponse> handleJustificatifManquantException(
+            JustificatifManquantException ex,
+            WebRequest request) {
+        this.request = request;
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
 
 }
 
