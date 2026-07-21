@@ -52,6 +52,15 @@ public class AbsenceService {
             throw new IllegalArgumentException("La date de fin ne peut pas précéder la date de début.");
         }
 
+        if (request.dateDebut().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("Impossible de créer une absence dans le passé.");
+        }
+
+        long dureeJours = java.time.temporal.ChronoUnit.DAYS.between(request.dateDebut(), request.dateFin());
+        if (dureeJours > 90) {
+            throw new IllegalArgumentException("La durée d'une absence ne peut pas dépasser 90 jours.");
+        }
+
         List<Absence> chevauchements = absenceRepository.findChevauchements(
                 employeId, request.dateDebut(), request.dateFin());
         if (!chevauchements.isEmpty()) {
@@ -123,6 +132,15 @@ public class AbsenceService {
                             absence.getTypeAbsence(),
                             absence.getDateDebut().getYear())
                     .orElseThrow(() -> new ResourceNotFoundException("Quota introuvable pour la validation."));
+            
+            // Revérification du solde au moment de la validation
+            if (quota.getJoursRestants() < absence.getNombreJours()) {
+                throw new QuotaInsuffisantException(
+                        "Quota insuffisant au moment de la validation : " + quota.getJoursRestants()
+                                + " jour(s) restant(s) pour " + absence.getTypeAbsence()
+                                + ", " + absence.getNombreJours() + " demandé(s).");
+            }
+            
             quota.setJoursPris(quota.getJoursPris() + absence.getNombreJours());
             quotaAbsenceRepository.save(quota);
         }

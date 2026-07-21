@@ -1,5 +1,7 @@
 package com.SSS.SGI.service;
 
+
+
 import com.SSS.SGI.entity.Affectation;
 import com.SSS.SGI.entity.Collaborateur;
 import com.SSS.SGI.entity.Projet;
@@ -9,6 +11,7 @@ import com.SSS.SGI.repository.CollaborateurRepository;
 import com.SSS.SGI.repository.ProjetRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.SSS.SGI.exception.TauxAffectationDepasseException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -49,9 +52,17 @@ public class AffectationService {
 
         // Validation du taux d'affectation
         if (tauxAffectation == null ||
-            tauxAffectation.compareTo(BigDecimal.ZERO) < 0 ||
-            tauxAffectation.compareTo(new BigDecimal("100")) > 0) {
+                tauxAffectation.compareTo(BigDecimal.ZERO) < 0 ||
+                tauxAffectation.compareTo(new BigDecimal("100")) > 0) {
             throw new IllegalArgumentException("Le taux d'affectation doit être entre 0 et 100");
+        }
+
+        // Validation du taux total (nouvelle règle)
+        if (!canAffectCollaborateur(collaborateurId, tauxAffectation)) {
+            BigDecimal tauxActuel = getTauxAffectationTotal(collaborateurId);
+            throw new TauxAffectationDepasseException(
+                    "Taux total dépassé pour le collaborateur " + collaborateurId + " : "
+                            + tauxActuel + "% déjà affecté, +" + tauxAffectation + "% demandé (max 100%).");
         }
 
         Affectation affectation = new Affectation();
@@ -103,12 +114,23 @@ public class AffectationService {
 
         // Validation du taux
         if (nouveauTaux == null ||
-            nouveauTaux.compareTo(BigDecimal.ZERO) < 0 ||
-            nouveauTaux.compareTo(new BigDecimal("100")) > 0) {
+                nouveauTaux.compareTo(BigDecimal.ZERO) < 0 ||
+                nouveauTaux.compareTo(new BigDecimal("100")) > 0) {
             throw new IllegalArgumentException("Le taux d'affectation doit être entre 0 et 100");
         }
 
         Affectation a = affectation.get();
+
+        // Validation du taux total, en excluant le taux actuel de cette affectation
+        BigDecimal tauxTotalSansCelleCi = getTauxAffectationTotal(collaborateurId).subtract(a.getTauxAffectation());
+        BigDecimal tauxFinal = tauxTotalSansCelleCi.add(nouveauTaux);
+        if (tauxFinal.compareTo(new BigDecimal("100")) > 0) {
+            throw new TauxAffectationDepasseException(
+                    "Taux total dépassé pour le collaborateur " + collaborateurId + " : "
+                            + tauxTotalSansCelleCi + "% sur les autres projets, "
+                            + nouveauTaux + "% demandé ici (max 100%).");
+        }
+
         a.setTauxAffectation(nouveauTaux);
         return affectationRepository.save(a);
     }

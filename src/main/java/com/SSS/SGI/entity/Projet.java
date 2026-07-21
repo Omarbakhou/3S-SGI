@@ -10,6 +10,7 @@ import lombok.ToString;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "projet")
@@ -41,9 +42,12 @@ public class Projet {
     @JoinColumn(name = "id_client", nullable = false)
     private Client client;
 
+
+    @JsonIgnore
     @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Imputation> imputations = new HashSet<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Affectation> affectations = new HashSet<>();
 
