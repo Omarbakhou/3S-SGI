@@ -38,6 +38,10 @@ public class QuotaAbsence {
     @Column(name = "jours_pris", nullable = false)
     private Double joursPris = 0.0;
 
+    @Version
+    @Column(name = "version")
+    private Long version;
+
     /** Non persisté : dérivé de joursAlloues - joursPris. */
     @Transient
     public Double getJoursRestants() {

@@ -8,7 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-
+import com.SSS.SGI.exception.TauxAffectationDepasseException;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
@@ -142,7 +142,43 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(TauxAffectationDepasseException.class)
+    public ResponseEntity<ErrorResponse> handleTauxAffectationDepasseException(
+            TauxAffectationDepasseException ex,
+            WebRequest request) {
+        this.request = request;
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(ImputationNonAutoriseeException.class)
+    public ResponseEntity<ErrorResponse> handleImputationNonAutoriseeException(
+            ImputationNonAutoriseeException ex,
+            WebRequest request) {
+        this.request = request;
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
 
+    @ExceptionHandler(ManagerNonAutoriseException.class)
+    public ResponseEntity<ErrorResponse> handleManagerNonAutoriseException(
+            ManagerNonAutoriseException ex,
+            WebRequest request) {
+        this.request = request;
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
 }
 
 

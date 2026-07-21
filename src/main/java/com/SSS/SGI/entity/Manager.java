@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,8 +21,12 @@ import java.util.Set;
 @DiscriminatorValue("MANAGER")
 public class Manager extends Collaborateur {
 
+    @JsonIgnore
     @OneToMany(mappedBy = "managerValidateur", cascade = CascadeType.ALL, orphanRemoval = false, fetch = FetchType.LAZY)
     private Set<Imputation> imputationsValidees = new HashSet<>();
+    @JsonIgnore
+    @OneToMany(mappedBy = "manager", fetch = FetchType.LAZY)
+    private Set<Employe> employesGeres = new HashSet<>();
 
     /**
      * Valide une imputation

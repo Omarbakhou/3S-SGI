@@ -124,32 +124,35 @@ public class ImputationController {
      */
     @GetMapping("/en-attente")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<List<Imputation>> getImputationsEnAttente() {
-        List<Imputation> imputations = imputationService.getImputationsEnAttenteForManager();
+    public ResponseEntity<List<Imputation>> getImputationsEnAttente(@RequestParam Long managerId) {
+        List<Imputation> imputations = imputationService.getImputationsEnAttenteForManager(managerId);
         return ResponseEntity.ok(imputations);
     }
 
     /**
      * Met à jour une imputation
-     * Accessible uniquement par les employés (modifications sur imputations en attente)
+     * Accessible uniquement par l'employé propriétaire (modifications sur imputations en attente)
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('EMPLOYE')")
     public ResponseEntity<Imputation> updateImputation(
             @PathVariable Long id,
+            @RequestParam Long employeId,
             @RequestBody Imputation updatedImputation) {
-        Imputation updated = imputationService.updateImputation(id, updatedImputation);
+        Imputation updated = imputationService.updateImputation(id, employeId, updatedImputation);
         return ResponseEntity.ok(updated);
     }
 
     /**
      * Supprime une imputation
-     * Accessible uniquement par les employés (suppression sur imputations en attente)
+     * Accessible uniquement par l'employé propriétaire (suppression sur imputations en attente)
      */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('EMPLOYE')")
-    public ResponseEntity<String> deleteImputation(@PathVariable Long id) {
-        imputationService.deleteImputation(id);
+    public ResponseEntity<String> deleteImputation(
+            @PathVariable Long id,
+            @RequestParam Long employeId) {
+        imputationService.deleteImputation(id, employeId);
         return ResponseEntity.ok("Imputation supprimée avec succès");
     }
 
@@ -179,4 +182,5 @@ public class ImputationController {
         return ResponseEntity.ok(rejected);
     }
 }
+
 

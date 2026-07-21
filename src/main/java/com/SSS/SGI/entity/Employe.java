@@ -9,6 +9,7 @@ import lombok.ToString;
 
 import java.util.HashSet;
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "employe")
@@ -20,8 +21,13 @@ import java.util.Set;
 @DiscriminatorValue("EMPLOYE")
 public class Employe extends Collaborateur {
 
+    @JsonIgnore
     @OneToMany(mappedBy = "employe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Imputation> imputations = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_manager")
+    private Manager manager;
 
     /**
      * Ajoute une imputation
