@@ -1,96 +1,101 @@
 # État de la sécurité — SGI Backend
 
-_Dernière vérification manuelle : 2026-08-12_
+_Dernière mise à jour : 2026-08-12 — activation de l'authentification JWT + RBAC._
 
 ## Résumé
 
-**L'authentification est désactivée.** Tous les endpoints `/api/**` sont actuellement
-accessibles sans identifiant, quel que soit le rôle annoté sur le contrôleur. Ce
-document décrit précisément ce qui est en place, ce qui ne l'est pas, et le correctif
-ponctuel appliqué en attendant qu'une vraie couche d'authentification soit construite.
+L'authentification par JWT et le RBAC (`ADMIN`, `MANAGER`, `EMPLOYE`) sont maintenant actifs
+sur tous les endpoints `/api/**`, à l'exception de `/api/auth/login` et `/api/auth/refresh`.
+Ce document décrit l'implémentation en place, comment obtenir un jeton, la limite structurelle
+assumée sur le rôle `ADMIN`, et ce qui reste hors périmètre.
 
-## Constat vérifié manuellement (curl, 2026-08-12)
+## Ce qui est en place
 
-Application démarrée localement (`./mvnw spring-boot:run`, port 8081, PostgreSQL local) :
+- **`SecurityConfig`** : `@EnableMethodSecurity(prePostEnabled = true)` — les `@PreAuthorize`
+  déjà présents sur les contrôleurs (`AbsenceController`, `AffectationController`,
+  `ClientController`, `CollaborateurController`, `ImputationController`, `ProjetController`)
+  sont désormais évalués. Session stateless, `JwtAuthenticationFilter` inséré avant
+  `UsernamePasswordAuthenticationFilter`. Toute requête sans authentification valide sur un
+  endpoint protégé reçoit 401 ; un rôle insuffisant reçoit 403 (réponses JSON explicites, voir
+  `SecurityConfig.writeError` pour le filtre et `GlobalExceptionHandler` pour les
+  `AccessDeniedException`/`AuthenticationException` levées pendant le dispatch MVC — les deux
+  chemins existent car une `AccessDeniedException` levée par `@PreAuthorize` est interceptée par
+  le `@ControllerAdvice` avant d'atteindre le filtre de sécurité).
+- **`JwtUtil`** : génère et valide les jetons (HS256, `jjwt` 0.12.3), claims `id` et `roles` en
+  plus du `sub` (email). Durée de vie configurée par `jwt.expiration` (`application.properties`).
+- **`CustomUserDetailsService`** : charge un `Collaborateur` par email et dérive son rôle depuis
+  son type concret (`Employe` → `EMPLOYE`, `Manager` → `MANAGER`).
+- **`JwtAuthenticationFilter`** : lit le header `Authorization: Bearer {token}`, peuple le
+  `SecurityContext` à partir des claims du jeton (pas d'accès base à chaque requête). Un jeton
+  absent ou invalide n'est jamais rejeté par le filtre lui-même — c'est la règle d'autorisation
+  qui décide 401/403.
+- **`AuthController`** : `POST /api/auth/login` (retourne le jeton + rôles), `POST
+  /api/auth/refresh` (réémet un jeton à partir d'un jeton encore valide), `GET /api/auth/me`.
 
-| Requête | Annotation `@PreAuthorize` | Credentials fournis | Résultat observé |
-|---|---|---|---|
-| `GET /api/collaborateurs` | `hasRole('MANAGER')` | Aucun | **200 OK** |
-| `GET /api/absences/en-attente` | `hasRole('MANAGER')` | Aucun | **200 OK** |
-| `GET /api/imputations` | `hasRole('MANAGER')` | Aucun | **200 OK** |
-| `DELETE /api/collaborateurs/{id}` | `hasRole('MANAGER')` | Aucun | **200 OK — suppression effectuée** |
+## Lancer l'application en local
 
-Les annotations `@PreAuthorize` présentes sur `AbsenceController`, `AffectationController`,
-`ClientController`, `CollaborateurController` et `ImputationController` référencent des
-rôles (`ADMIN`, `MANAGER`, `EMPLOYE`) qui **n'existent pas** en tant qu'autorités Spring
-Security dans ce projet — il n'y a ni entité `Admin`, ni enum `Role`, ni
-`UserDetailsService`, ni endpoint de login, ni filtre JWT. Ces annotations ne font
-actuellement rien, pour deux raisons cumulatives :
+Spring Boot ne charge pas `.env` automatiquement. Il faut exporter les variables avant de lancer
+l'appli (`.mvnw spring-boot:run` ou équivalent IDE), sinon `${DB_PASSWORD}`/`${JWT_SECRET}` ne
+résolvent à rien :
 
-1. `SecurityConfig.java` déclare `@EnableMethodSecurity(prePostEnabled = false)` —
-   `@PreAuthorize` n'est pas évalué du tout.
-2. La chaîne de filtres autorise tout (`.anyRequest().permitAll()`) et il n'existe
-   aucun filtre qui peuplerait un `Authentication` avec des autorités de rôle de toute
-   façon.
-
-`SecurityConfig.java` documente lui-même cet état comme temporaire :
-
-```java
-// Authentification désactivée temporairement : tous les endpoints /api/** sont ouverts.
+```powershell
+$env:DB_PASSWORD = "..."
+$env:JWT_SECRET = "..."
+$env:ADMIN_EMAILS = "vous@exemple.com"
+./mvnw spring-boot:run
 ```
 
-## Correctif appliqué : IDOR sur `/profile`
+Piège vérifié le 2026-08-12 : un ancien processus resté sur le port 8081 (build compilé avant
+l'ajout du filtre JWT) causait un 500 générique sur `/api/auth/login`, alors que le nouveau code
+fonctionnait déjà correctement — le nouveau build refusait de démarrer tant que ce processus
+occupait le port. Si le port est déjà pris, tuer l'ancien processus (`Get-NetTCPConnection
+-LocalPort 8081`) avant de relancer plutôt que de suspecter le code.
 
-`PUT /api/collaborateurs/{id}/profile` acceptait `id` depuis l'URL sans aucune
-vérification — n'importe qui pouvait modifier le nom/prénom/email de n'importe quel
-compte en devinant un ID. C'était un IDOR aveugle (aucune preuve de propriété requise).
+## Rôle ADMIN : pas d'entité dédiée
 
-À titre de comparaison, `POST /api/collaborateurs/{id}/change-password` exigeait déjà
-`ancienMotDePasse` et refusait la modification si le mot de passe actuel ne
-correspondait pas à celui du compte ciblé — ce n'est pas une vraie authentification,
-mais ça empêche un attaquant sans information de modifier un compte à l'aveugle.
+Contrainte du projet : pas de changement de schéma de base de données. Il n'existe donc pas de
+table/entité `Admin`. Un manager est promu `ADMIN` (en plus de `ROLE_MANAGER`) si son email
+figure dans la propriété `sgi.security.admin-emails` (liste séparée par des virgules), lue depuis
+la variable d'environnement `ADMIN_EMAILS` (voir `.env`, non commité). C'est un choix explicite :
+plus simple qu'une entité dédiée, mais un manager perd son statut ADMIN si son email est retiré
+de la liste — il n'y a pas de trace en base de qui est admin.
 
-**Correctif** : `updateProfile` exige maintenant `motDePasseActuel` dans le corps de la
-requête et le vérifie contre le mot de passe du compte ciblé avant toute modification,
-suivant exactement le même principe que `change-password`.
+## Correctif appliqué : IDOR sur `/profile` (mis à jour)
 
-- `UpdateProfileRequest.motDePasseActuel` (nouveau champ)
-- `CollaborateurService.updateCollaborateurProfile(id, nom, prenom, email, motDePasseActuel)`
-  lève `IllegalArgumentException` (→ 400) si le mot de passe ne correspond pas.
+`PUT /api/collaborateurs/{id}/profile` exige maintenant que l'`id` du principal authentifié (JWT)
+corresponde à l'`id` ciblé dans l'URL — sinon 403, avant même de vérifier le mot de passe. La
+vérification `motDePasseActuel` déjà en place est conservée en défense en profondeur.
 
-Vérifié manuellement :
+**Vérifié** (voir `RBACIntegrationTest`) :
 
 | Scénario | Résultat |
 |---|---|
-| Modifier le profil de l'id=3 sans `motDePasseActuel` | 400 `Le mot de passe actuel est incorrect` |
-| Modifier le profil de l'id=3 avec un mot de passe erroné | 400 `Le mot de passe actuel est incorrect` |
-| Modifier le profil de l'id=3 avec le bon mot de passe | 200 OK |
+| Employé modifie son propre profil (bon mot de passe) | 200 OK |
+| Employé modifie le profil d'un autre collaborateur | 403 Forbidden |
 
-**Limite assumée** : ceci n'est **pas** un contrôle d'autorisation réel — sans session ni
-JWT, il n'y a aucun moyen de savoir qui appelle l'API. Le mot de passe actuel sert de
-preuve de propriété minimale, pas d'authentification. Le vrai correctif consiste à
-comparer l'`id` du principal authentifié à l'`id` cible une fois qu'une couche
-d'authentification existera (voir ci-dessous), et à retirer/assouplir alors cette
-vérification par mot de passe si elle devient redondante.
+## Hors périmètre de cette passe (gaps connus, non corrigés)
 
-## Autres constats (non corrigés, hors périmètre de cette passe)
+- **Ownership par principal non généralisé** : `POST /api/absences/employe/{employeId}`,
+  `PUT/DELETE /api/imputations/{id}?employeId=...`, etc. acceptent toujours un `employeId`/
+  `managerId` fourni par le client sans vérifier qu'il correspond au principal authentifié. Un
+  EMPLOYE authentifié peut donc agir sur les données d'un autre `employeId` tant qu'il connaît
+  son identifiant. Seul `/collaborateurs/{id}/profile` a été corrigé (demande explicite).
+  Généraliser ce correctif (comparer systématiquement le principal JWT à l'id métier ciblé) reste
+  à faire.
+- **`POST /api/collaborateurs/{id}/change-password`** n'a pas reçu la même vérification de
+  propriété que `/profile` — même classe de problème, non demandée dans cette passe.
+- **Le hash du mot de passe est toujours renvoyé dans les réponses JSON** des endpoints
+  collaborateur (pas de `@JsonIgnore` sur `motDePasse`).
+- **`ADMIN` par liste d'emails plutôt que par entité** (voir ci-dessus) — acceptable tant que le
+  nombre d'admins reste faible et géré via l'environnement de déploiement.
 
-- **Secrets en clair dans `application.properties`** : le mot de passe PostgreSQL
-  (`spring.datasource.password`) est en clair et commité dans le dépôt. À déplacer vers
-  une variable d'environnement avant tout déploiement partagé.
-- **`jwt.secret` / `jwt.expiration`** sont définis dans `application.properties` et
-  `application-test.properties` mais ne sont utilisés par aucun code — reliquat d'une
-  configuration JWT jamais branchée dans ce dépôt.
-- **Le hash du mot de passe (`motDePasse`) est renvoyé dans les réponses JSON** des
-  endpoints collaborateur (`Collaborateur`/`Employe`/`Manager` n'ont pas de
-  `@JsonIgnore` sur ce champ). Le hash BCrypt n'est pas trivialement réversible, mais
-  ne devrait pas transiter côté client.
+## Tests
 
-## Pour aller plus loin
+- `JwtUtilTest` — génération/validation, expiration, signature invalide, altération.
+- `SecurityIntegrationTest` — login (succès/échec), `/me`, `/refresh`, rejet 401 sans jeton ou
+  jeton invalide.
+- `RBACIntegrationTest` — application réelle des rôles sur `GET /api/collaborateurs`
+  (`MANAGER`), `POST /api/absences/quotas` (`ADMIN`), `DELETE /api/collaborateurs/{id}`
+  (`MANAGER`), et le correctif IDOR sur `/profile`.
 
-Une implémentation JWT + RBAC + correctifs IDOR par principal authentifié existe déjà
-(dans un état non intégré à ce dépôt) et peut servir de base si/quand l'authentification
-doit être réactivée : `JwtUtil`, `JwtAuthenticationFilter`, `CustomUserDetailsService`,
-`SecurityService`, un enum `Role` et une entité `Admin`. Ce travail n'a pas été porté ici
-sur décision explicite — le périmètre de cette passe s'est limité à documenter l'état
-réel et à fermer l'IDOR le plus flagrant.
+`./mvnw test` — 70/70 tests passent (25 nouveaux, 45 préexistants inchangés).
