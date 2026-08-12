@@ -111,10 +111,15 @@ public class CollaborateurService {
      * Met à jour le profil du collaborateur (nom, prénom, email)
      * Permet au collaborateur de modifier ses données
      */
-    public Collaborateur updateCollaborateurProfile(Long id, String nom, String prenom, String email) {
+    public Collaborateur updateCollaborateurProfile(Long id, String nom, String prenom, String email, String motDePasseActuel) {
         Optional<Collaborateur> collaborateur = collaborateurRepository.findById(id);
         if (collaborateur.isPresent()) {
             Collaborateur c = collaborateur.get();
+            // Pas de session/JWT pour identifier l'appelant : le mot de passe actuel
+            // sert de preuve de propriété du compte, comme pour changePassword.
+            if (motDePasseActuel == null || !passwordEncoder.matches(motDePasseActuel, c.getMotDePasse())) {
+                throw new IllegalArgumentException("Le mot de passe actuel est incorrect");
+            }
             c.setNom(nom);
             c.setPrenom(prenom);
             c.setEmail(email);

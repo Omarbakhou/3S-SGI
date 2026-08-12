@@ -4,6 +4,9 @@ import com.SSS.SGI.entity.Collaborateur;
 import com.SSS.SGI.entity.Employe;
 import com.SSS.SGI.entity.Manager;
 import com.SSS.SGI.service.CollaborateurService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping({"/api/collaborateurs", "/api/collaborateur"})
 @CrossOrigin(origins = "*")
+@Tag(name = "Collaborateurs", description = "Comptes employés et managers : CRUD, profil et mot de passe")
 public class CollaborateurController {
 
     private final CollaborateurService collaborateurService;
@@ -28,10 +32,9 @@ public class CollaborateurController {
         this.collaborateurService = collaborateurService;
     }
 
-     /**
-      * Récupère un collaborateur par son email
-      * Accessible uniquement par les managers
-      */
+     @Operation(summary = "Récupérer un collaborateur par email", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "200", description = "Collaborateur trouvé")
+     @ApiResponse(responseCode = "404", description = "Collaborateur introuvable")
      @GetMapping("/email/{email}")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<Collaborateur> getCollaborateurByEmail(@PathVariable String email) {
@@ -39,10 +42,9 @@ public class CollaborateurController {
         return collaborateur.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    /**
-     * Récupère un collaborateur par son nom et prénom
-     * Accessible uniquement par les managers
-     */
+    @Operation(summary = "Rechercher un collaborateur par nom et prénom", description = "Accessible uniquement par les managers.")
+    @ApiResponse(responseCode = "200", description = "Collaborateur trouvé")
+    @ApiResponse(responseCode = "404", description = "Collaborateur introuvable")
     @GetMapping("/recherche")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Collaborateur> getCollaborateurByNomAndPrenom(
@@ -51,10 +53,9 @@ public class CollaborateurController {
         Optional<Collaborateur> collaborateur = collaborateurService.getCollaborateurByNomAndPrenom(nom, prenom);
         return collaborateur.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
-     /**
-      * Récupère tous les employés
-      * Accessible uniquement par les managers
-      */
+
+     @Operation(summary = "Lister tous les employés (simple)", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "200", description = "Liste des employés")
      @GetMapping("/employe")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<List<Employe>> getAllEmployesSimple() {
@@ -62,10 +63,8 @@ public class CollaborateurController {
          return ResponseEntity.ok(employes);
      }
 
-     /**
-      * Crée un nouvel employé
-      * Accessible uniquement par les managers
-      */
+     @Operation(summary = "Créer un employé", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "201", description = "Employé créé")
      @PostMapping("/employe")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<Employe> createEmploye(@Valid @RequestBody Employe employe) {
@@ -73,10 +72,8 @@ public class CollaborateurController {
          return new ResponseEntity<>(created, HttpStatus.CREATED);
      }
 
-     /**
-      * Crée un nouveau manager
-      * Accessible uniquement par les managers
-      */
+     @Operation(summary = "Créer un manager", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "201", description = "Manager créé")
      @PostMapping("/manager")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<Manager> createManager(@Valid @RequestBody Manager manager) {
@@ -84,10 +81,8 @@ public class CollaborateurController {
          return new ResponseEntity<>(created, HttpStatus.CREATED);
      }
 
-     /**
-      * Récupère tous les managers
-      * Accessible uniquement par les managers
-      */
+     @Operation(summary = "Lister tous les managers (simple)", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "200", description = "Liste des managers")
      @GetMapping("/manager")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<List<Manager>> getAllManagersSimple() {
@@ -95,11 +90,9 @@ public class CollaborateurController {
          return ResponseEntity.ok(managers);
      }
 
-     /**
-      * Récupère le profil du collaborateur courant
-      * Accessible par tous les collaborateurs authentifiés
-      * Note: Added regex \\d+ to ensure it only matches numerical IDs
-      */
+    @Operation(summary = "Récupérer le profil d'un collaborateur", description = "Accessible par tous les collaborateurs authentifiés.")
+    @ApiResponse(responseCode = "200", description = "Collaborateur trouvé")
+    @ApiResponse(responseCode = "404", description = "Collaborateur introuvable")
     @GetMapping("/{id:\\d+}")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<Collaborateur> getCollaborateur(@PathVariable Long id) {
@@ -107,10 +100,8 @@ public class CollaborateurController {
         return collaborateur.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    /**
-     * Récupère tous les collaborateurs
-     * Accessible uniquement par les managers
-     */
+    @Operation(summary = "Lister tous les collaborateurs", description = "Accessible uniquement par les managers.")
+    @ApiResponse(responseCode = "200", description = "Liste de tous les collaborateurs")
     @GetMapping
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<Collaborateur>> getAllCollaborateurs() {
@@ -118,11 +109,13 @@ public class CollaborateurController {
         return ResponseEntity.ok(collaborateurs);
     }
 
-    /**
-     * Met à jour le profil du collaborateur (nom, prénom, email)
-     * Permet au collaborateur de modifier ses données
-     * Note: Added regex \\d+
-     */
+    @Operation(
+            summary = "Mettre à jour le profil (nom, prénom, email)",
+            description = "Permet au collaborateur de modifier ses données. "
+                    + "Nécessite `motDePasseActuel` : en l'absence de session/JWT, c'est la seule "
+                    + "preuve de propriété du compte disponible actuellement (voir SECURITY.md).")
+    @ApiResponse(responseCode = "200", description = "Profil mis à jour")
+    @ApiResponse(responseCode = "400", description = "Mot de passe actuel incorrect ou collaborateur introuvable")
     @PutMapping("/{id:\\d+}/profile")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<Collaborateur> updateProfile(
@@ -132,16 +125,17 @@ public class CollaborateurController {
                 id,
                 request.getNom(),
                 request.getPrenom(),
-                request.getEmail()
+                request.getEmail(),
+                request.getMotDePasseActuel()
         );
         return ResponseEntity.ok(updated);
     }
 
-    /**
-     * Change le mot de passe du collaborateur
-     * Permet au collaborateur de modifier son mot de passe
-     * Note: Added regex \\d+
-     */
+    @Operation(
+            summary = "Changer le mot de passe",
+            description = "Permet au collaborateur de modifier son mot de passe. Nécessite l'ancien mot de passe.")
+    @ApiResponse(responseCode = "200", description = "Mot de passe changé avec succès")
+    @ApiResponse(responseCode = "400", description = "Ancien mot de passe incorrect ou collaborateur introuvable")
     @PostMapping("/{id:\\d+}/change-password")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<String> changePassword(
@@ -151,10 +145,8 @@ public class CollaborateurController {
         return ResponseEntity.ok("Mot de passe changé avec succès");
     }
 
-     /**
-      * Récupère tous les employés
-      * Accessible uniquement par les managers
-      */
+     @Operation(summary = "Lister tous les employés", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "200", description = "Liste des employés")
      @GetMapping("/employes")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<List<Employe>> getAllEmployes() {
@@ -162,11 +154,9 @@ public class CollaborateurController {
          return ResponseEntity.ok(employes);
      }
 
-     /**
-      * Récupère un employé par son ID
-      * Accessible uniquement par les managers
-      * Note: Added regex \\d+
-      */
+     @Operation(summary = "Récupérer un employé par ID", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "200", description = "Employé trouvé")
+     @ApiResponse(responseCode = "404", description = "Employé introuvable")
      @GetMapping("/employe/{id:\\d+}")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<Employe> getEmployeById(@PathVariable Long id) {
@@ -174,10 +164,9 @@ public class CollaborateurController {
          return employe.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
      }
 
-     /**
-      * Récupère un employé par son email
-      * Accessible uniquement par les managers
-      */
+     @Operation(summary = "Récupérer un employé par email", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "200", description = "Employé trouvé")
+     @ApiResponse(responseCode = "404", description = "Employé introuvable")
      @GetMapping("/employe/email/{email}")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<Employe> findEmployeByEmail(@PathVariable String email) {
@@ -185,10 +174,8 @@ public class CollaborateurController {
          return employe.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
      }
 
-     /**
-      * Récupère tous les managers
-      * Accessible uniquement par les managers
-      */
+     @Operation(summary = "Lister tous les managers", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "200", description = "Liste des managers")
      @GetMapping("/managers")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<List<Manager>> getAllManagers() {
@@ -196,11 +183,9 @@ public class CollaborateurController {
          return ResponseEntity.ok(managers);
      }
 
-     /**
-      * Récupère un manager par son ID
-      * Accessible uniquement par les managers
-      * Note: Added regex \\d+
-      */
+     @Operation(summary = "Récupérer un manager par ID", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "200", description = "Manager trouvé")
+     @ApiResponse(responseCode = "404", description = "Manager introuvable")
      @GetMapping("/manager/{id:\\d+}")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<Manager> getManagerById(@PathVariable Long id) {
@@ -208,10 +193,9 @@ public class CollaborateurController {
          return manager.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
      }
 
-     /**
-      * Récupère un manager par son email
-      * Accessible uniquement par les managers
-      */
+     @Operation(summary = "Récupérer un manager par email", description = "Accessible uniquement par les managers.")
+     @ApiResponse(responseCode = "200", description = "Manager trouvé")
+     @ApiResponse(responseCode = "404", description = "Manager introuvable")
      @GetMapping("/manager/email/{email}")
      @PreAuthorize("hasRole('MANAGER')")
      public ResponseEntity<Manager> getManagerByEmail(@PathVariable String email) {
@@ -219,11 +203,8 @@ public class CollaborateurController {
          return manager.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
      }
 
-    /**
-     * Supprime un collaborateur
-     * Accessible uniquement par les managers
-     * Note: Added regex \\d+
-     */
+    @Operation(summary = "Supprimer un collaborateur", description = "Accessible uniquement par les managers.")
+    @ApiResponse(responseCode = "200", description = "Collaborateur supprimé")
     @DeleteMapping("/{id:\\d+}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<String> deleteCollaborateur(@PathVariable Long id) {
@@ -231,5 +212,3 @@ public class CollaborateurController {
         return ResponseEntity.ok("Collaborateur supprimé avec succès");
     }
 }
-
-

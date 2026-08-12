@@ -3,6 +3,9 @@ package com.SSS.SGI.controller;
 import com.SSS.SGI.entity.Imputation;
 import com.SSS.SGI.entity.StatutImputation;
 import com.SSS.SGI.service.ImputationService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +22,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/imputations")
 @CrossOrigin(origins = "*")
+@Tag(name = "Imputations", description = "Saisie et validation des imputations de temps sur les projets")
 public class ImputationController {
 
     private final ImputationService imputationService;
@@ -27,10 +31,8 @@ public class ImputationController {
         this.imputationService = imputationService;
     }
 
-    /**
-     * Crée une nouvelle imputation
-     * Accessible uniquement par les employés
-     */
+    @Operation(summary = "Créer une imputation", description = "Accessible uniquement par les employés.")
+    @ApiResponse(responseCode = "201", description = "Imputation créée")
     @PostMapping
     @PreAuthorize("hasRole('EMPLOYE')")
     public ResponseEntity<Imputation> createImputation(@RequestBody Imputation imputation) {
@@ -38,10 +40,9 @@ public class ImputationController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    /**
-     * Récupère une imputation par son ID
-     * Accessible par les employés et managers
-     */
+    @Operation(summary = "Récupérer une imputation par ID", description = "Accessible par les employés et managers.")
+    @ApiResponse(responseCode = "200", description = "Imputation trouvée")
+    @ApiResponse(responseCode = "404", description = "Imputation introuvable")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<Imputation> getImputation(@PathVariable Long id) {
@@ -49,10 +50,8 @@ public class ImputationController {
         return imputation.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    /**
-     * Récupère toutes les imputations
-     * Accessible uniquement par  managers
-     */
+    @Operation(summary = "Lister toutes les imputations", description = "Accessible uniquement par les managers.")
+    @ApiResponse(responseCode = "200", description = "Liste de toutes les imputations")
     @GetMapping
     @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<Imputation>> getAllImputations() {
@@ -60,10 +59,8 @@ public class ImputationController {
         return ResponseEntity.ok(imputations);
     }
 
-    /**
-     * Récupère les imputations d'un employé
-     * Accessible par l'employé lui-même et les managers
-     */
+    @Operation(summary = "Lister les imputations d'un employé", description = "Accessible par l'employé lui-même et les managers.")
+    @ApiResponse(responseCode = "200", description = "Liste des imputations de l'employé")
     @GetMapping("/employe/{employeId}")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<List<Imputation>> getImputationsByEmploye(@PathVariable Long employeId) {
@@ -71,10 +68,8 @@ public class ImputationController {
         return ResponseEntity.ok(imputations);
     }
 
-    /**
-     * Récupère les imputations d'un projet
-     * Accessible par les managers
-     */
+    @Operation(summary = "Lister les imputations d'un projet", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "200", description = "Liste des imputations du projet")
     @GetMapping("/projet/{projetId}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<Imputation>> getImputationsByProjet(@PathVariable Long projetId) {
@@ -82,10 +77,8 @@ public class ImputationController {
         return ResponseEntity.ok(imputations);
     }
 
-    /**
-     * Récupère les imputations d'un employe et dun projet
-     * Accessible par les managers
-     */
+    @Operation(summary = "Lister les imputations d'un employé sur un projet", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "200", description = "Liste des imputations de l'employé sur le projet")
     @GetMapping("/employe/{employeId}/projet/{projetId}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<Imputation>> getImputationsByEmployeAndProjet(
@@ -95,11 +88,8 @@ public class ImputationController {
         return ResponseEntity.ok(imputations);
     }
 
-
-    /**
-     * Récupère les imputations d'un employe avec un statut spécifique
-     * Accessible par les managers
-     */
+    @Operation(summary = "Lister les imputations d'un employé selon leur statut", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "200", description = "Liste des imputations filtrées par statut")
     @GetMapping("/employe/{employeId}/statut/{statut}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<Imputation>> getImputationsByEmployeAndStatut(@PathVariable Long employeId, @PathVariable StatutImputation statut) {
@@ -107,10 +97,8 @@ public class ImputationController {
         return ResponseEntity.ok(imputations);
     }
 
-    /**
-     * Récupère les imputations avec id manager
-     * Accessible par les managers
-     */
+    @Operation(summary = "Lister les imputations rattachées à un manager", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "200", description = "Liste des imputations du manager")
     @GetMapping("/manager/{managerId}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<Imputation>> getImputationsByManager(@PathVariable Long managerId) {
@@ -118,10 +106,8 @@ public class ImputationController {
         return ResponseEntity.ok(imputations);
     }
 
-    /**
-     * Récupère les imputations en attente de validation
-     * Accessible par les managers
-     */
+    @Operation(summary = "Lister les imputations en attente de validation pour un manager", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "200", description = "Liste des imputations EN_ATTENTE pour ce manager")
     @GetMapping("/en-attente")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<Imputation>> getImputationsEnAttente(@RequestParam Long managerId) {
@@ -129,10 +115,9 @@ public class ImputationController {
         return ResponseEntity.ok(imputations);
     }
 
-    /**
-     * Met à jour une imputation
-     * Accessible uniquement par l'employé propriétaire (modifications sur imputations en attente)
-     */
+    @Operation(summary = "Mettre à jour une imputation", description = "Accessible uniquement par l'employé propriétaire (imputations en attente uniquement).")
+    @ApiResponse(responseCode = "200", description = "Imputation mise à jour")
+    @ApiResponse(responseCode = "404", description = "Imputation introuvable")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('EMPLOYE')")
     public ResponseEntity<Imputation> updateImputation(
@@ -143,10 +128,8 @@ public class ImputationController {
         return ResponseEntity.ok(updated);
     }
 
-    /**
-     * Supprime une imputation
-     * Accessible uniquement par l'employé propriétaire (suppression sur imputations en attente)
-     */
+    @Operation(summary = "Supprimer une imputation", description = "Accessible uniquement par l'employé propriétaire (imputations en attente uniquement).")
+    @ApiResponse(responseCode = "200", description = "Imputation supprimée")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('EMPLOYE')")
     public ResponseEntity<String> deleteImputation(
@@ -156,10 +139,8 @@ public class ImputationController {
         return ResponseEntity.ok("Imputation supprimée avec succès");
     }
 
-    /**
-     * Valide une imputation
-     * Accessible uniquement par les managers
-     */
+    @Operation(summary = "Valider une imputation", description = "Accessible uniquement par les managers.")
+    @ApiResponse(responseCode = "200", description = "Imputation validée")
     @PostMapping("/{imputationId}/valider")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Imputation> validerImputation(
@@ -169,10 +150,8 @@ public class ImputationController {
         return ResponseEntity.ok(validated);
     }
 
-    /**
-     * Rejette une imputation
-     * Accessible uniquement par les managers
-     */
+    @Operation(summary = "Rejeter une imputation", description = "Accessible uniquement par les managers.")
+    @ApiResponse(responseCode = "200", description = "Imputation rejetée")
     @PostMapping("/{imputationId}/rejeter")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Imputation> rejeterImputation(
@@ -182,5 +161,3 @@ public class ImputationController {
         return ResponseEntity.ok(rejected);
     }
 }
-
-
