@@ -16,9 +16,9 @@ public class OpenApiConfig {
                         .title("SGI - Système de Gestion des Imputations")
                         .description("API de gestion des collaborateurs, projets, imputations, "
                                 + "affectations et absences. "
-                                + "Note : l'authentification est actuellement désactivée sur ce "
-                                + "déploiement (voir SECURITY.md) — tous les endpoints sont "
-                                + "accessibles sans jeton.")
+                                + "Authentification par JWT (POST /api/auth/login) : passez le jeton "
+                                + "obtenu dans le header Authorization: Bearer {token} sur tous les "
+                                + "autres endpoints (voir SECURITY.md).")
                         .version("v1")
                         .contact(new Contact().name("Smart Square Services")));
     }

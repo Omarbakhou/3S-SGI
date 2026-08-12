@@ -7,10 +7,13 @@ import com.SSS.SGI.service.CollaborateurService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.SSS.SGI.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -111,16 +114,20 @@ public class CollaborateurController {
 
     @Operation(
             summary = "Mettre à jour le profil (nom, prénom, email)",
-            description = "Permet au collaborateur de modifier ses données. "
-                    + "Nécessite `motDePasseActuel` : en l'absence de session/JWT, c'est la seule "
-                    + "preuve de propriété du compte disponible actuellement (voir SECURITY.md).")
+            description = "Permet au collaborateur de modifier ses données. Réservé au propriétaire du "
+                    + "compte (vérifié via le JWT) ; `motDePasseActuel` reste requis en défense en profondeur.")
     @ApiResponse(responseCode = "200", description = "Profil mis à jour")
     @ApiResponse(responseCode = "400", description = "Mot de passe actuel incorrect ou collaborateur introuvable")
+    @ApiResponse(responseCode = "403", description = "Le jeton ne correspond pas au compte ciblé")
     @PutMapping("/{id:\\d+}/profile")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<Collaborateur> updateProfile(
             @PathVariable Long id,
-            @Valid @RequestBody UpdateProfileRequest request) {
+            @Valid @RequestBody UpdateProfileRequest request,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        if (!principal.getId().equals(id)) {
+            throw new AccessDeniedException("Vous ne pouvez modifier que votre propre profil");
+        }
         Collaborateur updated = collaborateurService.updateCollaborateurProfile(
                 id,
                 request.getNom(),
