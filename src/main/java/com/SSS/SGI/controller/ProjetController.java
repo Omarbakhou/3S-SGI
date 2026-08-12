@@ -4,6 +4,9 @@ import com.SSS.SGI.entity.Client;
 import com.SSS.SGI.entity.Projet;
 import com.SSS.SGI.entity.BudgetProjet;
 import com.SSS.SGI.service.ProjetService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +22,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/projets")
 @CrossOrigin(origins = "*")
+@Tag(name = "Projets", description = "Gestion des projets, avec ou sans budget forfaitaire")
 public class ProjetController {
 
     private final ProjetService projetService;
@@ -29,10 +33,9 @@ public class ProjetController {
 
     // ==================== Gestion des Projets ====================
 
-    /**
-     * Crée un nouveau projet
-     * Accessible par les managers
-     */
+    @Operation(summary = "Créer un projet", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "201", description = "Projet créé")
+    @ApiResponse(responseCode = "400", description = "Client manquant")
     @PostMapping
     @PreAuthorize("hasAnyRole('MANAGER')")
     @SuppressWarnings("all")
@@ -41,10 +44,9 @@ public class ProjetController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    /**
-     * Récupère un projet par son ID
-     * Accessible par tous les collaborateurs
-     */
+    @Operation(summary = "Récupérer un projet par ID", description = "Accessible par tous les collaborateurs.")
+    @ApiResponse(responseCode = "200", description = "Projet trouvé")
+    @ApiResponse(responseCode = "404", description = "Projet introuvable")
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<Projet> getProjet(@PathVariable Long id) {
@@ -52,10 +54,8 @@ public class ProjetController {
         return projet.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    /**
-     * Récupère tous les projets
-     * Accessible par les managers
-     */
+    @Operation(summary = "Lister tous les projets", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "200", description = "Liste des projets")
     @GetMapping
     @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<Projet>> getAllProjets() {
@@ -63,10 +63,8 @@ public class ProjetController {
         return ResponseEntity.ok(projets);
     }
 
-    /**
-     * Récupère un projet par son nom
-     * Accessible par les managers
-     */
+    @Operation(summary = "Récupérer un projet par son nom", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "200", description = "Projet trouvé (ou vide si absent)")
     @GetMapping("/nomProjet")
     @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<Optional<Projet>> findProjetByNom(@RequestParam String nom) {
@@ -74,10 +72,8 @@ public class ProjetController {
         return ResponseEntity.ok(projets);
     }
 
-    /**
-     * Récupère les projets d'un client
-     * Accessible par les managers
-     */
+    @Operation(summary = "Lister les projets d'un client", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "200", description = "Liste des projets du client")
     @GetMapping("/client/{clientId}")
     @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<Projet>> getProjetsByClient(@PathVariable Long clientId) {
@@ -85,10 +81,9 @@ public class ProjetController {
         return ResponseEntity.ok(projets);
     }
 
-    /**
-     * Met à jour un projet
-     * Accessible par les managers
-     */
+    @Operation(summary = "Mettre à jour un projet", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "200", description = "Projet mis à jour")
+    @ApiResponse(responseCode = "400", description = "Projet introuvable")
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<Projet> updateProjet(
@@ -98,10 +93,8 @@ public class ProjetController {
         return ResponseEntity.ok(updated);
     }
 
-    /**
-     * Supprime un projet
-     * Accessible uniquement par les managers
-     */
+    @Operation(summary = "Supprimer un projet", description = "Accessible uniquement par les managers.")
+    @ApiResponse(responseCode = "200", description = "Projet supprimé")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<String> deleteProjet(@PathVariable Long id) {
@@ -111,10 +104,9 @@ public class ProjetController {
 
     // ==================== Gestion des Projets avec Budget ====================
 
-    /**
-     * Crée un projet avec budget
-     * Accessible par les managers
-     */
+    @Operation(summary = "Créer un projet avec budget", description = "Accessible par les managers.")
+    @ApiResponse(responseCode = "201", description = "Projet budgétisé créé")
+    @ApiResponse(responseCode = "400", description = "Client, budget initial ou TJM manquant")
     @PostMapping("/budget")
     @PreAuthorize("hasAnyRole('MANAGER')")
     @SuppressWarnings("all")
@@ -123,10 +115,9 @@ public class ProjetController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    /**
-     * Récupère un projet avec budget par son ID
-     * Accessible par les managers et administrateurs
-     */
+    @Operation(summary = "Récupérer un projet avec budget par ID", description = "Accessible par les managers et administrateurs.")
+    @ApiResponse(responseCode = "200", description = "Projet budgétisé trouvé")
+    @ApiResponse(responseCode = "404", description = "Projet budgétisé introuvable")
     @GetMapping("/budget/{id}")
     @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<BudgetProjet> getBudgetProjet(@PathVariable Long id) {
@@ -134,10 +125,8 @@ public class ProjetController {
         return budgetProjet.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    /**
-     * Récupère tous les projets avec budget
-     * Accessible par les managers et administrateurs
-     */
+    @Operation(summary = "Lister tous les projets avec budget", description = "Accessible par les managers et administrateurs.")
+    @ApiResponse(responseCode = "200", description = "Liste des projets budgétisés")
     @GetMapping("/budget")
     @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<BudgetProjet>> getAllBudgetProjets() {
@@ -145,10 +134,8 @@ public class ProjetController {
         return ResponseEntity.ok(budgetProjets);
     }
 
-    /**
-     * Récupère les projets avec budget d'un client
-     * Accessible par les managers et administrateurs
-     */
+    @Operation(summary = "Lister les projets avec budget d'un client", description = "Accessible par les managers et administrateurs.")
+    @ApiResponse(responseCode = "200", description = "Liste des projets budgétisés du client")
     @GetMapping("/budget/client/{clientId}")
     @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<List<BudgetProjet>> getBudgetProjetsByClient(@PathVariable Long clientId) {
@@ -156,10 +143,9 @@ public class ProjetController {
         return ResponseEntity.ok(budgetProjets);
     }
 
-    /**
-     * Met à jour un projet avec budget
-     * Accessible par les managers et administrateurs
-     */
+    @Operation(summary = "Mettre à jour le budget d'un projet", description = "Accessible par les managers et administrateurs.")
+    @ApiResponse(responseCode = "200", description = "Projet budgétisé mis à jour")
+    @ApiResponse(responseCode = "400", description = "Projet budgétisé introuvable")
     @PutMapping("/budget/{id}")
     @PreAuthorize("hasAnyRole('MANAGER')")
     public ResponseEntity<BudgetProjet> updateBudgetProjet(
@@ -169,10 +155,8 @@ public class ProjetController {
         return ResponseEntity.ok(updated);
     }
 
-    /**
-     * Supprime un projet avec budget
-     * Accessible uniquement par les managers
-     */
+    @Operation(summary = "Supprimer un projet avec budget", description = "Accessible uniquement par les managers.")
+    @ApiResponse(responseCode = "200", description = "Projet budgétisé supprimé")
     @DeleteMapping("/budget/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<String> deleteBudgetProjet(@PathVariable Long id) {
@@ -180,5 +164,3 @@ public class ProjetController {
         return ResponseEntity.ok("Projet avec budget supprimé avec succès");
     }
 }
-
-

@@ -4,25 +4,33 @@ import com.SSS.SGI.interfaces.ImputationInterface;
 import com.SSS.SGI.interfaces.ValidationInterface;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "imputation")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"projet", "employe", "managerValidateur"})
 public class Imputation implements ImputationInterface, ValidationInterface {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_imputation")
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(name = "nom", nullable = false, length = 100)
     private String nom;
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", nullable = false)
