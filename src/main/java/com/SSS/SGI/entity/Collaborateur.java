@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -47,6 +48,7 @@ public class Collaborateur {
 
     @NotBlank(message = "Le mot de passe du collaborateur est obligatoire")
     @Column(name = "mot_de_passe", nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String motDePasse;
 
     @JsonIgnore
