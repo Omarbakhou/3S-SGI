@@ -9,6 +9,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.request.WebRequest;
 import com.SSS.SGI.exception.TauxAffectationDepasseException;
 import java.time.LocalDateTime;
@@ -160,6 +161,38 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleImputationNonAutoriseeException(
             ImputationNonAutoriseeException ex,
             WebRequest request) {
+        this.request = request;
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex,
+            WebRequest request) {
+        // Sans ce handler, le @ExceptionHandler(Exception.class) plus bas transforme
+        // un simple « méthode non supportée » en 500, ce qui laisse croire à une panne
+        // serveur alors que la route existe pour d'autres verbes.
+        this.request = request;
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.METHOD_NOT_ALLOWED.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(CompteDesactiveException.class)
+    public ResponseEntity<ErrorResponse> handleCompteDesactiveException(
+            CompteDesactiveException ex,
+            WebRequest request) {
+        // 403 et non 401 : l'authentification a réussi, c'est le compte qui est fermé.
+        // Doit rester déclaré avant AuthenticationException pour ne pas être avalé par
+        // le handler générique qui renverrait « Email ou mot de passe incorrect ».
         this.request = request;
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.FORBIDDEN.value(),

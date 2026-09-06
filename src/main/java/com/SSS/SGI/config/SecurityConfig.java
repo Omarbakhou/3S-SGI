@@ -1,5 +1,6 @@
 package com.SSS.SGI.config;
 
+import com.SSS.SGI.repository.CollaborateurRepository;
 import com.SSS.SGI.security.JwtAuthenticationFilter;
 import com.SSS.SGI.security.JwtUtil;
 import com.SSS.SGI.service.CustomUserDetailsService;
@@ -51,14 +52,17 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final CollaborateurRepository collaborateurRepository;
 
     public SecurityConfig(
             CustomUserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder,
-            JwtUtil jwtUtil) {
+            JwtUtil jwtUtil,
+            CollaborateurRepository collaborateurRepository) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.collaborateurRepository = collaborateurRepository;
     }
 
     @Bean
@@ -74,7 +78,9 @@ public class SecurityConfig {
             .exceptionHandling(handling -> handling
                     .authenticationEntryPoint(this::handleUnauthenticated)
                     .accessDeniedHandler(this::handleForbidden))
-            .addFilterBefore(new JwtAuthenticationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(
+                    new JwtAuthenticationFilter(jwtUtil, collaborateurRepository),
+                    UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -119,8 +125,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Les deux origines sont conservées volontairement : `sgi.local` est le nom
+        // utilisé en démonstration, `localhost` reste valable pour qui n'a pas modifié
+        // son fichier hosts. Retirer localhost casserait le poste des autres.
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://sgi.local:5173"));
+        // PATCH est nécessaire à la (dés)activation de comptes : sans lui le preflight
+        // échoue côté navigateur alors que l'appel passe très bien via curl.
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setMaxAge(3600L);
 

@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
+import { useAuth } from '../auth/AuthContext.jsx';
+import ConfirmDialog from '../components/ConfirmDialog.jsx';
 import ErrorBanner from '../components/ErrorBanner.jsx';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
 export default function AdminPage() {
+  const { user } = useAuth();
   const [tab, setTab] = useState('projets');
 
   const [clients, setClients] = useState([]);
@@ -48,6 +51,39 @@ export default function AdminPage() {
   }, []);
 
   const managers = collaborateurs.filter((c) => c.type === 'Manager');
+
+  // ---- Activer / désactiver un compte ----
+  // `demande` porte le compte visé tant que la modale est ouverte ; null = fermée.
+  const [demande, setDemande] = useState(null);
+  const [actionBusy, setActionBusy] = useState(false);
+  const [actionError, setActionError] = useState(null);
+  const [actionSuccess, setActionSuccess] = useState(null);
+
+  async function confirmerChangementStatut() {
+    if (!demande) return;
+    const { id, type, actif, nomComplet } = demande;
+    setActionBusy(true);
+    setActionError(null);
+    setActionSuccess(null);
+    try {
+      const verbe = actif ? 'desactiver' : 'reactiver';
+      const misAJour = await api.patch(`/api/admin/comptes/${id}/${verbe}`);
+      setCollaborateurs((list) =>
+        list.map((c) => (c.id === id && c.type === type ? { ...c, actif: misAJour.actif } : c))
+      );
+      setActionSuccess(
+        misAJour.actif ? `Compte « ${nomComplet} » réactivé.` : `Compte « ${nomComplet} » désactivé.`
+      );
+      setDemande(null);
+    } catch (err) {
+      // L'erreur reste affichée après fermeture de la modale : les refus métier
+      // (dernier admin, propre compte) doivent être lisibles dans le tableau.
+      setActionError(err.message);
+      setDemande(null);
+    } finally {
+      setActionBusy(false);
+    }
+  }
 
   // ---- Créer un client ----
   const [clientNom, setClientNom] = useState('');
@@ -207,6 +243,22 @@ export default function AdminPage() {
   return (
     <div className="page">
       <h1>Administration</h1>
+
+      <ConfirmDialog
+        open={demande !== null}
+        danger={demande?.actif === true}
+        busy={actionBusy}
+        titre={demande?.actif ? 'Désactiver ce compte ?' : 'Réactiver ce compte ?'}
+        message={
+          demande?.actif
+            ? `${demande?.nomComplet} ne pourra plus se connecter. Le compte n'est pas supprimé : `
+              + `ses imputations et ses absences restent conservées, et vous pourrez le réactiver.`
+            : `${demande?.nomComplet} pourra de nouveau se connecter avec ses identifiants habituels.`
+        }
+        libelleConfirmer={demande?.actif ? 'Désactiver' : 'Réactiver'}
+        onConfirm={confirmerChangementStatut}
+        onCancel={() => setDemande(null)}
+      />
 
       <div className="tabs">
         <button type="button" className={tab === 'projets' ? 'tab active' : 'tab'} onClick={() => setTab('projets')}>
@@ -514,6 +566,8 @@ export default function AdminPage() {
             <h2>Comptes existants</h2>
             {collabLoading && <p className="muted">Chargement…</p>}
             <ErrorBanner message={collabError} />
+            <ErrorBanner message={actionError} />
+            {actionSuccess && <div className="success-banner">{actionSuccess}</div>}
             {!collabLoading && !collabError && (
               <table className="table">
                 <thead>
@@ -522,17 +576,44 @@ export default function AdminPage() {
                     <th>Email</th>
                     <th>Type</th>
                     <th>Rattaché à</th>
+                    <th>Statut</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {collaborateurs.map((c) => (
-                    <tr key={`${c.type}-${c.id}`}>
-                      <td>{c.nomComplet}</td>
-                      <td>{c.email}</td>
-                      <td>{c.type}</td>
-                      <td>{c.type === 'Employé' ? c.manager?.nomComplet || '—' : '—'}</td>
-                    </tr>
-                  ))}
+                  {collaborateurs.map((c) => {
+                    const estMonCompte = c.id === user?.id;
+                    return (
+                      <tr key={`${c.type}-${c.id}`} className={c.actif ? undefined : 'ligne-inactive'}>
+                        <td>{c.nomComplet}</td>
+                        <td>{c.email}</td>
+                        <td>{c.type}</td>
+                        <td>{c.type === 'Employé' ? c.manager?.nomComplet || '—' : '—'}</td>
+                        <td>
+                          <span className={c.actif ? 'badge badge-actif' : 'badge badge-inactif'}>
+                            {c.actif ? 'Actif' : 'Inactif'}
+                          </span>
+                        </td>
+                        <td className="cellule-actions">
+                          {estMonCompte ? (
+                            <span className="muted">Votre compte</span>
+                          ) : (
+                            <button
+                              type="button"
+                              className={c.actif ? 'btn btn-danger' : 'btn btn-secondary'}
+                              onClick={() => {
+                                setActionError(null);
+                                setActionSuccess(null);
+                                setDemande(c);
+                              }}
+                            >
+                              {c.actif ? 'Désactiver' : 'Réactiver'}
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}

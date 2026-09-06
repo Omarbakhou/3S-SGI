@@ -2,6 +2,7 @@ package com.SSS.SGI.security;
 
 import com.SSS.SGI.entity.Employe;
 import com.SSS.SGI.entity.Manager;
+import com.SSS.SGI.repository.CollaborateurRepository;
 import com.SSS.SGI.repository.EmployeRepository;
 import com.SSS.SGI.repository.ManagerRepository;
 import com.SSS.SGI.service.CustomUserDetailsService;
@@ -17,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +42,7 @@ class RBACIntegrationTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private EmployeRepository employeRepository;
     @Autowired private ManagerRepository managerRepository;
+    @Autowired private CollaborateurRepository collaborateurRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JwtUtil jwtUtil;
     @Autowired private CustomUserDetailsService userDetailsService;
@@ -158,25 +161,66 @@ class RBACIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ---- DELETE /api/collaborateurs/{id} : hasRole('MANAGER') ----
+    // ---- Suppression physique d'un collaborateur : endpoint retiré ----
 
     @Test
-    @DisplayName("DELETE /api/collaborateurs/{id} : MANAGER -> 200, EMPLOYE -> 403")
-    void deleteCollaborateur_roleEnforced() throws Exception {
-        Employe toDelete = new Employe();
-        toDelete.setNom("Temp");
-        toDelete.setPrenom("Worker");
-        toDelete.setEmail("temp.delete@sgi.test");
-        toDelete.setMotDePasse(passwordEncoder.encode("Password123!"));
-        toDelete = employeRepository.save(toDelete);
+    @DisplayName("DELETE /api/collaborateurs/{id} n'existe plus, même pour un manager")
+    void deleteCollaborateur_endpointRetire() throws Exception {
+        Employe cible = new Employe();
+        cible.setNom("Temp");
+        cible.setPrenom("Worker");
+        cible.setEmail("temp.delete@sgi.test");
+        cible.setMotDePasse(passwordEncoder.encode("Password123!"));
+        cible = employeRepository.save(cible);
 
-        mockMvc.perform(delete("/api/collaborateurs/" + toDelete.getId())
-                        .header("Authorization", tokenFor(employe.getEmail())))
+        // Supprimer la ligne emporterait l'historique des imputations et des absences :
+        // la désactivation (AdminController) est désormais la seule voie pour retirer un accès.
+        mockMvc.perform(delete("/api/collaborateurs/" + cible.getId())
+                        .header("Authorization", tokenFor(manager.getEmail())))
+                .andExpect(status().isMethodNotAllowed());
+
+        assertTrue(collaborateurRepository.findById(cible.getId()).isPresent(),
+                "le collaborateur doit toujours exister en base");
+    }
+
+    // ---- Création de comptes : réservée aux ADMIN ----
+
+    @Test
+    @DisplayName("POST /api/collaborateurs/manager : MANAGER -> 403, ADMIN -> 201")
+    void createManager_reserveAuxAdmins() throws Exception {
+        String corps = "{\"nom\":\"Nouveau\",\"prenom\":\"Manager\","
+                + "\"email\":\"nouveau.manager@sgi.test\",\"motDePasse\":\"Password123!\"}";
+
+        mockMvc.perform(post("/api/collaborateurs/manager")
+                        .header("Authorization", tokenFor(manager.getEmail()))
+                        .contentType("application/json")
+                        .content(corps))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(delete("/api/collaborateurs/" + toDelete.getId())
-                        .header("Authorization", tokenFor(manager.getEmail())))
-                .andExpect(status().isOk());
+        mockMvc.perform(post("/api/collaborateurs/manager")
+                        .header("Authorization", tokenFor(ADMIN_EMAIL))
+                        .contentType("application/json")
+                        .content(corps))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("POST /api/collaborateurs/employe : MANAGER -> 403, ADMIN -> 201")
+    void createEmploye_reserveAuxAdmins() throws Exception {
+        String corps = "{\"nom\":\"Nouvel\",\"prenom\":\"Employe\","
+                + "\"email\":\"nouvel.employe@sgi.test\",\"motDePasse\":\"Password123!\"}";
+
+        mockMvc.perform(post("/api/collaborateurs/employe")
+                        .header("Authorization", tokenFor(manager.getEmail()))
+                        .contentType("application/json")
+                        .content(corps))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/api/collaborateurs/employe")
+                        .header("Authorization", tokenFor(ADMIN_EMAIL))
+                        .contentType("application/json")
+                        .content(corps))
+                .andExpect(status().isCreated());
     }
 
     // ---- IDOR : PUT /api/collaborateurs/{id}/profile ----

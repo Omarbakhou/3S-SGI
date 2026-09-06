@@ -96,6 +96,9 @@ export const api = {
   post: (path, body) => request(path, { method: 'POST', body: body ?? {} }),
   postNoBody: (path) => request(path, { method: 'POST' }),
   put: (path, body) => request(path, { method: 'PUT', body: body ?? {} }),
+  // Sans corps : les actions d'administration (désactiver/réactiver) portent tout
+  // dans l'URL. Le backend autorise explicitement PATCH côté CORS.
+  patch: (path) => request(path, { method: 'PATCH' }),
   del: (path) => request(path, { method: 'DELETE' }),
 };
 

@@ -51,6 +51,15 @@ public class Collaborateur {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String motDePasse;
 
+    /**
+     * Désactivation logique. Un compte retiré par un administrateur passe à false :
+     * il ne peut plus se connecter, mais ses imputations et absences restent en base.
+     * On ne supprime jamais physiquement un collaborateur, sous peine de perdre
+     * l'historique qui le référence.
+     */
+    @Column(name = "actif", nullable = false)
+    private boolean actif = true;
+
     @JsonIgnore
     @OneToMany(mappedBy = "collaborateur", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Affectation> affectations = new HashSet<>();

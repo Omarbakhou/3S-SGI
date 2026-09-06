@@ -146,12 +146,9 @@ public class CollaborateurService {
         }
     }
 
-    /**
-     * Supprime un collaborateur
-     */
-    public void deleteCollaborateur(Long id) {
-        collaborateurRepository.deleteById(id);
-    }
+    // deleteCollaborateur a été retiré avec l'endpoint qui l'exposait : supprimer la
+    // ligne emportait l'historique des imputations et des absences du collaborateur.
+    // La désactivation (AdminCompteService) remplace ce besoin sans perte de données.
 
     /**
      * Récupère tous les employés

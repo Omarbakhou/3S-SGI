@@ -3,6 +3,7 @@ package com.SSS.SGI.controller;
 import com.SSS.SGI.dto.LoginRequest;
 import com.SSS.SGI.dto.LoginResponse;
 import com.SSS.SGI.dto.MeResponse;
+import com.SSS.SGI.exception.CompteDesactiveException;
 import com.SSS.SGI.security.CustomUserDetails;
 import com.SSS.SGI.security.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -44,6 +46,12 @@ public class AuthController {
         try {
             authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email(), request.motDePasse()));
+        } catch (DisabledException e) {
+            // Cas distinct des identifiants erronés : les identifiants sont bons, c'est le compte
+            // qui a été désactivé. Le dire explicitement évite à l'utilisateur de croire à une
+            // faute de frappe et de réessayer indéfiniment.
+            throw new CompteDesactiveException(
+                    "Ce compte a été désactivé. Contactez un administrateur pour le réactiver.");
         } catch (AuthenticationException e) {
             // Message générique volontaire : ne pas révéler si c'est l'email ou le mot de passe qui est faux.
             throw new BadCredentialsException("Email ou mot de passe incorrect");

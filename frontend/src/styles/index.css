@@ -433,3 +433,64 @@ h2 {
   border-radius: 6px;
   font: inherit;
 }
+
+/* ---- Boîte de confirmation modale (ConfirmDialog) ---- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(36, 39, 43, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 30rem;
+  width: 100%;
+  box-shadow: 0 12px 32px rgba(36, 39, 43, 0.18);
+}
+
+.modal-titre {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+.modal-message {
+  margin: 0 0 1.25rem;
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* ---- Statut d'un compte ---- */
+
+.badge-actif {
+  background: var(--badge-approved-bg);
+  color: var(--badge-approved-text);
+}
+
+.badge-inactif {
+  background: var(--badge-cancelled-bg);
+  color: var(--badge-cancelled-text);
+}
+
+/* Ligne grisée pour un compte désactivé, pour le repérer d'un coup d'œil. */
+.ligne-inactive td:not(.cellule-actions) {
+  opacity: 0.55;
+}
+
+.cellule-actions {
+  white-space: nowrap;
+}

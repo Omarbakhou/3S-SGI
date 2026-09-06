@@ -66,19 +66,21 @@ public class CollaborateurController {
          return ResponseEntity.ok(employes);
      }
 
-     @Operation(summary = "Créer un employé", description = "Accessible uniquement par les managers.")
+     @Operation(summary = "Créer un employé", description = "Réservé aux administrateurs.")
      @ApiResponse(responseCode = "201", description = "Employé créé")
+     @ApiResponse(responseCode = "403", description = "Rôle ADMIN requis")
      @PostMapping("/employe")
-     @PreAuthorize("hasRole('MANAGER')")
+     @PreAuthorize("hasRole('ADMIN')")
      public ResponseEntity<Employe> createEmploye(@Valid @RequestBody Employe employe) {
          Employe created = collaborateurService.createEmploye(employe);
          return new ResponseEntity<>(created, HttpStatus.CREATED);
      }
 
-     @Operation(summary = "Créer un manager", description = "Accessible uniquement par les managers.")
+     @Operation(summary = "Créer un manager", description = "Réservé aux administrateurs.")
      @ApiResponse(responseCode = "201", description = "Manager créé")
+     @ApiResponse(responseCode = "403", description = "Rôle ADMIN requis")
      @PostMapping("/manager")
-     @PreAuthorize("hasRole('MANAGER')")
+     @PreAuthorize("hasRole('ADMIN')")
      public ResponseEntity<Manager> createManager(@Valid @RequestBody Manager manager) {
          Manager created = collaborateurService.createManager(manager);
          return new ResponseEntity<>(created, HttpStatus.CREATED);
@@ -215,12 +217,9 @@ public class CollaborateurController {
          return manager.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
      }
 
-    @Operation(summary = "Supprimer un collaborateur", description = "Accessible uniquement par les managers.")
-    @ApiResponse(responseCode = "200", description = "Collaborateur supprimé")
-    @DeleteMapping("/{id:\\d+}")
-    @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<String> deleteCollaborateur(@PathVariable Long id) {
-        collaborateurService.deleteCollaborateur(id);
-        return ResponseEntity.ok("Collaborateur supprimé avec succès");
-    }
+    // La suppression physique d'un collaborateur a été retirée : elle emportait
+    // l'historique des imputations et des absences qui le référencent, et elle était
+    // ouverte à tout manager. Retirer un accès se fait désormais par désactivation,
+    // réservée aux administrateurs : PATCH /api/admin/comptes/{id}/desactiver
+    // (voir AdminController).
 }
