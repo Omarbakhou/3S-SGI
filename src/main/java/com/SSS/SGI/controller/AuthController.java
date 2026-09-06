@@ -71,7 +71,8 @@ public class AuthController {
         }
 
         CustomUserDetails principal = CustomUserDetails.fromRoles(
-                jwtUtil.extractId(token), jwtUtil.extractEmail(token), null, jwtUtil.extractRoles(token));
+                jwtUtil.extractId(token), jwtUtil.extractEmail(token), null,
+                jwtUtil.extractNom(token), jwtUtil.extractPrenom(token), jwtUtil.extractRoles(token));
         return ResponseEntity.ok(buildLoginResponse(principal));
     }
 
@@ -80,13 +81,15 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<MeResponse> me(Authentication authentication) {
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
-        return ResponseEntity.ok(new MeResponse(principal.getId(), principal.getUsername(), extractRoles(principal)));
+        return ResponseEntity.ok(new MeResponse(
+                principal.getId(), principal.getUsername(), principal.getNom(), principal.getPrenom(), extractRoles(principal)));
     }
 
     private LoginResponse buildLoginResponse(CustomUserDetails principal) {
         String token = jwtUtil.generateToken(principal);
         return new LoginResponse(
-                token, "Bearer", principal.getId(), principal.getUsername(), extractRoles(principal), jwtUtil.getExpirationMs());
+                token, "Bearer", principal.getId(), principal.getUsername(),
+                principal.getNom(), principal.getPrenom(), extractRoles(principal), jwtUtil.getExpirationMs());
     }
 
     private List<String> extractRoles(CustomUserDetails principal) {

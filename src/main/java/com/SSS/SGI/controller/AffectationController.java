@@ -1,6 +1,8 @@
 package com.SSS.SGI.controller;
 
 import com.SSS.SGI.entity.Affectation;
+import com.SSS.SGI.security.CustomUserDetails;
+import com.SSS.SGI.security.IdentiteAppelant;
 import com.SSS.SGI.service.AffectationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -47,21 +50,28 @@ public class AffectationController {
 
     @Operation(summary = "Récupérer une affectation", description = "Accessible par les managers et employés.")
     @ApiResponse(responseCode = "200", description = "Affectation trouvée")
+    @ApiResponse(responseCode = "403", description = "Un employé consulte l'affectation d'un autre collaborateur")
     @ApiResponse(responseCode = "404", description = "Affectation introuvable")
     @GetMapping("/{collaborateurId}/{projetId}")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<Affectation> getAffectation(
             @PathVariable Long collaborateurId,
-            @PathVariable Long projetId) {
+            @PathVariable Long projetId,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        IdentiteAppelant.exigerProprietaireSiSimpleEmploye(collaborateurId, principal);
         Optional<Affectation> affectation = affectationService.getAffectation(collaborateurId, projetId);
         return affectation.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Lister les affectations d'un collaborateur", description = "Accessible par le collaborateur lui-même, les managers et administrateurs.")
     @ApiResponse(responseCode = "200", description = "Liste des affectations du collaborateur")
+    @ApiResponse(responseCode = "403", description = "Un employé consulte les affectations d'un autre collaborateur")
     @GetMapping("/collaborateur/{collaborateurId}")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER', 'ADMIN')")
-    public ResponseEntity<List<Affectation>> getAffectationsByCollaborateur(@PathVariable Long collaborateurId) {
+    public ResponseEntity<List<Affectation>> getAffectationsByCollaborateur(
+            @PathVariable Long collaborateurId,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        IdentiteAppelant.exigerProprietaireSiSimpleEmploye(collaborateurId, principal);
         List<Affectation> affectations = affectationService.getAffectationsByCollaborateur(collaborateurId);
         return ResponseEntity.ok(affectations);
     }
@@ -110,9 +120,13 @@ public class AffectationController {
 
     @Operation(summary = "Calculer le taux d'affectation total d'un collaborateur", description = "Accessible par le collaborateur lui-même, les managers et administrateurs.")
     @ApiResponse(responseCode = "200", description = "Taux d'affectation total (somme sur tous les projets)")
+    @ApiResponse(responseCode = "403", description = "Un employé consulte le taux d'un autre collaborateur")
     @GetMapping("/collaborateur/{collaborateurId}/taux-total")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER', 'ADMIN')")
-    public ResponseEntity<BigDecimal> getTauxAffectationTotal(@PathVariable Long collaborateurId) {
+    public ResponseEntity<BigDecimal> getTauxAffectationTotal(
+            @PathVariable Long collaborateurId,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        IdentiteAppelant.exigerProprietaireSiSimpleEmploye(collaborateurId, principal);
         BigDecimal tauxTotal = affectationService.getTauxAffectationTotal(collaborateurId);
         return ResponseEntity.ok(tauxTotal);
     }

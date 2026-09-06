@@ -21,9 +21,10 @@ public class QuotaAbsence {
     @Column(name = "id_quota")
     private Long id;
 
+    /** Titulaire du quota : un Employe ou un Manager (colonne id_employe conservée telle quelle). */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_employe", nullable = false)
-    private Employe employe;
+    private Collaborateur collaborateur;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type_absence", nullable = false, length = 40)

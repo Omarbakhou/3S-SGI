@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,6 +32,16 @@ public class Imputation implements ImputationInterface, ValidationInterface {
     @Column(name = "nom", nullable = false, length = 100)
     private String nom;
 
+    /**
+     * Nullable en base : les imputations créées avant l'ajout de ce champ n'ont pas de date.
+     * La création via l'API l'exige toujours (voir CreateImputationRequest).
+     */
+    @Column(name = "date_imputation")
+    private LocalDate dateImputation;
+
+    /** Nullable en base pour la même raison que dateImputation. */
+    @Column(name = "heures")
+    private Double heures;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", nullable = false)
@@ -50,6 +61,9 @@ public class Imputation implements ImputationInterface, ValidationInterface {
 
     @Column(name = "date_validation")
     private LocalDateTime dateValidation;
+
+    @Column(name = "motif_rejet", length = 500)
+    private String motifRejet;
 
     // ========== Implémentation de l'interface Imputation ==========
 
@@ -118,15 +132,17 @@ public class Imputation implements ImputationInterface, ValidationInterface {
      * Rejette cette imputation
      *
      * @param manager le manager qui rejette
+     * @param motif   la raison du rejet
      * @throws IllegalStateException si l'imputation n'est pas en attente
      */
     @Override
-    public void rejeter(Manager manager) {
+    public void rejeter(Manager manager, String motif) {
         if (this.statut != StatutImputation.EN_ATTENTE) {
             throw new IllegalStateException("Seule une imputation en attente peut être rejetée");
         }
         this.statut = StatutImputation.REJETEE;
         this.managerValidateur = manager;
+        this.motifRejet = motif;
         this.dateValidation = LocalDateTime.now();
     }
 

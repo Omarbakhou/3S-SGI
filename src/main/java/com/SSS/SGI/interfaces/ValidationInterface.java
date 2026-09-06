@@ -20,8 +20,9 @@ public interface ValidationInterface {
      * Rejette l'imputation
      *
      * @param manager le manager qui rejette l'imputation
+     * @param motif   la raison du rejet
      */
-    void rejeter(Manager manager);
+    void rejeter(Manager manager, String motif);
 
     /**
      * Retourne le manager validateur

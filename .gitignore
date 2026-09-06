@@ -34,3 +34,16 @@ build/
 
 .env
 application-local.properties
+
+### Fichiers de travail locaux (logs, PID, scratch) ###
+*.log
+backend-pid.txt
+cp.txt
+body.json
+login.json
+endpoints.json
+run.ps1
+
+### Données locales générées à l'exécution ###
+justificatifs/
+temp-absences/

@@ -45,13 +45,14 @@ public class Manager extends Collaborateur {
      * Rejette une imputation
      *
      * @param imputation l'imputation à rejeter
+     * @param motif      la raison du rejet
      * @throws IllegalStateException si l'imputation n'est pas en attente
      */
-    public void rejeterImputation(Imputation imputation) {
+    public void rejeterImputation(Imputation imputation, String motif) {
         if (imputation.getStatut() != StatutImputation.EN_ATTENTE) {
             throw new IllegalStateException("Seules les imputations en attente peuvent être rejetées");
         }
-        imputation.rejeter(this);
+        imputation.rejeter(this, motif);
     }
 
     /**

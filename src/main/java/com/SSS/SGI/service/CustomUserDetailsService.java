@@ -45,7 +45,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         List<String> roles = resolveRoles(collaborateur);
         return CustomUserDetails.fromRoles(
-                collaborateur.getId(), collaborateur.getEmail(), collaborateur.getMotDePasse(), roles);
+                collaborateur.getId(), collaborateur.getEmail(), collaborateur.getMotDePasse(),
+                collaborateur.getNom(), collaborateur.getPrenom(), roles);
     }
 
     private List<String> resolveRoles(Collaborateur collaborateur) {

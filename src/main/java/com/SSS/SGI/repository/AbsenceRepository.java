@@ -11,22 +11,22 @@ import java.util.List;
 
 public interface AbsenceRepository extends JpaRepository<Absence, Long> {
 
-    List<Absence> findByEmploye_Id(Long employeId);
+    List<Absence> findByCollaborateur_Id(Long collaborateurId);
 
     List<Absence> findByStatut(StatutAbsence statut);
 
     /**
-     * Absences du même employé qui chevauchent la période donnée,
-     * en ignorant celles déjà rejetées ou annulées.
+     * Absences du même collaborateur (employé ou manager) qui chevauchent la période
+     * donnée, en ignorant celles déjà rejetées ou annulées.
      */
     @Query("""
         SELECT a FROM Absence a
-        WHERE a.employe.id = :employeId
+        WHERE a.collaborateur.id = :collaborateurId
         AND a.statut <> com.SSS.SGI.entity.enums.StatutAbsence.REJETEE
         AND a.statut <> com.SSS.SGI.entity.enums.StatutAbsence.ANNULEE
         AND a.dateDebut <= :dateFin AND a.dateFin >= :dateDebut
         """)
-    List<Absence> findChevauchements(@Param("employeId") Long employeId,
+    List<Absence> findChevauchements(@Param("collaborateurId") Long collaborateurId,
                                       @Param("dateDebut") LocalDate dateDebut,
                                       @Param("dateFin") LocalDate dateFin);
 }

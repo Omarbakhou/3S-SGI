@@ -15,6 +15,8 @@ public record AbsenceDTO(
         StatutAbsence statut,
         Long employeId,
         String employeNomComplet,
+        /** "EMPLOYE" ou "MANAGER" : type réel du titulaire (employeId le désigne dans les deux cas). */
+        String collaborateurType,
         Long managerValidateurId,
         LocalDateTime dateDemande,
         LocalDateTime dateValidation,

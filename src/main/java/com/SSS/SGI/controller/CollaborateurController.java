@@ -143,11 +143,16 @@ public class CollaborateurController {
             description = "Permet au collaborateur de modifier son mot de passe. Nécessite l'ancien mot de passe.")
     @ApiResponse(responseCode = "200", description = "Mot de passe changé avec succès")
     @ApiResponse(responseCode = "400", description = "Ancien mot de passe incorrect ou collaborateur introuvable")
+    @ApiResponse(responseCode = "403", description = "Le jeton ne correspond pas au compte ciblé")
     @PostMapping("/{id:\\d+}/change-password")
     @PreAuthorize("hasAnyRole('EMPLOYE', 'MANAGER')")
     public ResponseEntity<String> changePassword(
             @PathVariable Long id,
-            @Valid @RequestBody ChangePasswordRequest request) {
+            @Valid @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal CustomUserDetails principal) {
+        if (!principal.getId().equals(id)) {
+            throw new AccessDeniedException("Vous ne pouvez changer que votre propre mot de passe");
+        }
         collaborateurService.changePassword(id, request.getAncienMotDePasse(), request.getNouveauMotDePasse());
         return ResponseEntity.ok("Mot de passe changé avec succès");
     }

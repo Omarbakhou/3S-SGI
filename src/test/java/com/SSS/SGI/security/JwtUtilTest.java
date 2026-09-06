@@ -16,7 +16,7 @@ class JwtUtilTest {
     }
 
     private CustomUserDetails employeUser() {
-        return CustomUserDetails.fromRoles(1L, "employe@sgi.test", "hash", List.of("EMPLOYE"));
+        return CustomUserDetails.fromRoles(1L, "employe@sgi.test", "hash", "Doe", "Jane", List.of("EMPLOYE"));
     }
 
     @Test
@@ -31,6 +31,8 @@ class JwtUtilTest {
         assertEquals("employe@sgi.test", jwtUtil.extractEmail(token));
         assertEquals(1L, jwtUtil.extractId(token));
         assertEquals(List.of("EMPLOYE"), jwtUtil.extractRoles(token));
+        assertEquals("Doe", jwtUtil.extractNom(token));
+        assertEquals("Jane", jwtUtil.extractPrenom(token));
     }
 
     @Test
@@ -77,7 +79,7 @@ class JwtUtilTest {
     @DisplayName("Les rôles multiples sont conservés dans le jeton (cas manager promu admin)")
     void multipleRoles_arePreserved() {
         JwtUtil jwtUtil = jwtUtil(60_000);
-        CustomUserDetails adminManager = CustomUserDetails.fromRoles(2L, "admin@sgi.test", "hash", List.of("MANAGER", "ADMIN"));
+        CustomUserDetails adminManager = CustomUserDetails.fromRoles(2L, "admin@sgi.test", "hash", "Root", "Ada", List.of("MANAGER", "ADMIN"));
 
         String token = jwtUtil.generateToken(adminManager);
 

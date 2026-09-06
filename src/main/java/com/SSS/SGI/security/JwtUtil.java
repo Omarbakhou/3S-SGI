@@ -21,6 +21,8 @@ public class JwtUtil {
 
     private static final String CLAIM_ID = "id";
     private static final String CLAIM_ROLES = "roles";
+    private static final String CLAIM_NOM = "nom";
+    private static final String CLAIM_PRENOM = "prenom";
 
     private final SecretKey signingKey;
     private final long expirationMs;
@@ -44,6 +46,8 @@ public class JwtUtil {
                 .subject(user.getUsername())
                 .claim(CLAIM_ID, user.getId())
                 .claim(CLAIM_ROLES, roles)
+                .claim(CLAIM_NOM, user.getNom())
+                .claim(CLAIM_PRENOM, user.getPrenom())
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(signingKey)
@@ -81,6 +85,14 @@ public class JwtUtil {
     @SuppressWarnings("unchecked")
     public List<String> extractRoles(String token) {
         return (List<String>) parseClaims(token).get(CLAIM_ROLES, List.class);
+    }
+
+    public String extractNom(String token) {
+        return parseClaims(token).get(CLAIM_NOM, String.class);
+    }
+
+    public String extractPrenom(String token) {
+        return parseClaims(token).get(CLAIM_PRENOM, String.class);
     }
 
     public long getExpirationMs() {

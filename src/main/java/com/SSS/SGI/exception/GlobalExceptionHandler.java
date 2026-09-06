@@ -209,6 +209,19 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(AdminNonAutoriseException.class)
+    public ResponseEntity<ErrorResponse> handleAdminNonAutoriseException(
+            AdminNonAutoriseException ex,
+            WebRequest request) {
+        this.request = request;
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.FORBIDDEN.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
 }
 
 

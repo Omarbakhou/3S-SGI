@@ -42,9 +42,13 @@ public class Absence implements AbsenceInterface, ValidationAbsenceInterface {
     @Column(name = "statut", nullable = false, length = 20)
     private StatutAbsence statut = StatutAbsence.EN_ATTENTE;
 
+    /**
+     * Titulaire de la demande : un Employe ou un Manager (colonne id_employe conservée
+     * telle quelle, sa cible n'est plus limitée aux seules lignes de type EMPLOYE).
+     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_employe", nullable = false)
-    private Employe employe;
+    private Collaborateur collaborateur;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_manager_validateur")

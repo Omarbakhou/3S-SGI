@@ -9,8 +9,8 @@ import java.util.Optional;
 
 public interface QuotaAbsenceRepository extends JpaRepository<QuotaAbsence, Long> {
 
-    Optional<QuotaAbsence> findByEmploye_IdAndTypeAbsenceAndAnnee(
-            Long employeId, TypeAbsence typeAbsence, Integer annee);
+    Optional<QuotaAbsence> findByCollaborateur_IdAndTypeAbsenceAndAnnee(
+            Long collaborateurId, TypeAbsence typeAbsence, Integer annee);
 
-    List<QuotaAbsence> findByEmploye_IdAndAnnee(Long employeId, Integer annee);
+    List<QuotaAbsence> findByCollaborateur_IdAndAnnee(Long collaborateurId, Integer annee);
 }

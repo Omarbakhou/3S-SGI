@@ -2,5 +2,5 @@ package com.SSS.SGI.dto;
 
 import java.util.List;
 
-public record MeResponse(Long id, String email, List<String> roles) {
+public record MeResponse(Long id, String email, String nom, String prenom, List<String> roles) {
 }

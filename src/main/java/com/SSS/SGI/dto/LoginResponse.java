@@ -7,6 +7,8 @@ public record LoginResponse(
         String type,
         Long id,
         String email,
+        String nom,
+        String prenom,
         List<String> roles,
         long expiresIn) {
 }
