@@ -1,6 +1,7 @@
 package com.SSS.SGI.entity;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -15,6 +16,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "client")
+// Voir Collaborateur : masque la mecanique du proxy Hibernate dans le JSON.
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Getter
 @Setter
 @NoArgsConstructor

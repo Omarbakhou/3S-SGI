@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -17,6 +18,10 @@ import java.util.Set;
 
 @Entity
 @Table(name = "collaborateur")
+// Une association LAZY sérialisée alors qu'elle est encore un proxy Hibernate expose
+// la mécanique interne du proxy ("hibernateLazyInitializer", "handler") dans le JSON.
+// C'est du bruit qui n'a aucun sens pour un client de l'API.
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Getter
 @Setter
 @NoArgsConstructor

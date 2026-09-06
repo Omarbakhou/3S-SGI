@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import com.SSS.SGI.exception.TauxAffectationDepasseException;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -168,6 +169,22 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now()
         );
         return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(
+            NoResourceFoundException ex,
+            WebRequest request) {
+        // Même raison que pour le 405 ci-dessous : sans ce handler, une URL inexistante
+        // ressort en 500 « Une erreur interne s'est produite », ce qui laisse chercher
+        // une panne serveur là où il n'y a qu'une faute de frappe dans le chemin.
+        this.request = request;
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Ressource introuvable : " + ex.getResourcePath(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

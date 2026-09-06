@@ -10,10 +10,13 @@ import lombok.ToString;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "projet")
+// Voir Collaborateur : masque la mecanique du proxy Hibernate dans le JSON.
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
